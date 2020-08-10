@@ -136,12 +136,11 @@ World.prototype.createAnimals = function(numberOfAnimalsToCreate) {
 
 World.prototype.reportAnimal = function(report) {
     this.animalReport[report.id] = report;
-    this.totalFirings += report.totalFirings;
 }
 
 World.prototype.tick = function() {
     this.tickNr++;
-    if (this.tickNr % 500 == 0) console.log("Tick " + this.tickNr);
+    if (this.tickNr % 1 == 0) console.log("Tick " + this.tickNr);
     debug("Started world tick " + this.tickNr + " with " + this.animals.length + " animals in the world.");
     this.animalReport = {};
     // Now, catch up to the minimal animal level
