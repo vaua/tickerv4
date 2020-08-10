@@ -13,7 +13,7 @@ var idleTimeBeforeNextRequestAttempt = 100;
 // When the simulation page is opened. It will initialize rendering
 // variables and ask for a batch to process, starting the loop.
 function processDataBatch() {
-    var url = "http://localhost:3000/processBatch";
+    var url = "processBatch";
     var method = "GET";
     var shouldBeAsync = true;
     var request = new XMLHttpRequest();
@@ -52,7 +52,7 @@ function processDataBatch() {
 // new loop is triggered.
 function executeAndSubmitResult(batchData) {
     //var XMLHttpRequest = require("xmlhttprequest").XMLHttpRequest;
-    var url = "http://localhost:3000/submitBatchProcessingResult";
+    var url = "submitBatchProcessingResult";
     var method = "POST";
     var shouldBeAsync = true;
     var request = new XMLHttpRequest();

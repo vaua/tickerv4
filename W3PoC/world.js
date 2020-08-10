@@ -1,6 +1,6 @@
 var debug = require('debug')('world');
 var Animal = require('../public/javascripts/animal.js')
-var Genome = require('../public/javascripts/Genome.js')
+var Genome = require('../public/javascripts/genome.js')
 
 const world_size = 1000;
 const init_animals = 150;

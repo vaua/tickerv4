@@ -36,11 +36,25 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
 
+
 //app.use(logger('dev'));
 
 
 //app.use('/', index);
 //app.use('/users', users);
+
+
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    if (req.method === 'OPTIONS') {
+        res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH');
+        return res.status(200).json({});
+    };
+  next();
+});
+
 
 // This is handler for accessing the main page. It returns index page and
 // creates a new world if needed. If a world is in existance, it will not create
@@ -116,6 +130,9 @@ app.post('/submitBatchProcessingResult', function(req, res) {
     res.end();
     //debug("Sending back the end to response.");
 });
+
+
+
 
 
 // catch 404 and forward to error handler
