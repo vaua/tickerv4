@@ -9,16 +9,18 @@ var index = require('./routes/index');
 var users = require('./routes/users');
 var World = require('./W3PoC/world.js')
 var debug = require('debug')('app');
+require('log-timestamp');
 
 
 var app = express();
 
 var world = 0;
+var batchNumber = 0;
 var toBeProcessed = [];
 var doneProcessing = [];
 
 // This variable controls the size of the normal batch sent to client for processing.
-var batchSize = 10;
+var batchSize = 1500;
 
 // This variable is a pointer of sort that keeps track of how many animals
 // we've already sent for processing, and where the next batch shall begin.
@@ -30,11 +32,13 @@ app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
+
+
 
 
 //app.use(logger('dev'));
@@ -98,9 +102,9 @@ app.get('/processBatch', function(req, res){
       sentForProcessing += batchSize;
       //console.log("Sending " + batch.length + " animals.");
       //console.log("Locs: " + world.locations);
-      var response = {"locations" : world.locations, "batch" : batch};
+      var response = {"locations" : world.locations, "batch" : batch, "batchNumber" : batchNumber, "timeStamp" : Date.now()};
       res.send(response);
-      //console.debug("returned response: " + response);
+      console.debug("Sent batch: " + batchNumber++);
   } else {
     res.send('"status" : 0');
     debug("No animals to process. Sent back status 0 (wait).");
@@ -167,7 +171,7 @@ function executeUpdate() {
     var energyLoss = 2;
     var energyContent = 5;
 
-    console.log("EXECUTING UPDATE.");
+    console.log("Executing update.");
     doneProcessing = doneProcessing.flat();
     console.log("flattened.");
     doneProcessing = doneProcessing.filter(function(el) {
@@ -175,7 +179,7 @@ function executeUpdate() {
         return (el != null && el.length > 0);
     });
 
-    console.log("filtered.");
+    //console.log("filtered.");
     console.log("There are " + doneProcessing.length + " actions contributed.");
     doneProcessing.forEach(action => {
         world.worldActions[action[0]](action[1]);

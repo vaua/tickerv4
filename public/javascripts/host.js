@@ -6,6 +6,7 @@ var ctx;
 var gene = new Genome();
 
 
+
 var idleTimeBeforeNextRequestAttempt = 100;
 
 
@@ -30,10 +31,14 @@ function processDataBatch() {
            var updatedData = request.responseText;
 
            if ('"status" : 0'.localeCompare(updatedData) == 0) {
+	       console.log("No data to be processed available. Idling for some time before asking again.");
                setTimeout(processDataBatch(), idleTimeBeforeNextRequestAttempt);
            } else {
-               //console.log("Received: " + updatedData);
-               executeAndSubmitResult(JSON.parse(updatedData));
+               console.log("Received data batch with length " + updatedData.length + ".");
+	       var batch = JSON.parse(updatedData);
+               console.log("Parsed data batch " + batch.batchNumber + ", created: " + (Date.now() - batch.timeStamp) + " ms ago.");
+               executeAndSubmitResult(batch);
+	       console.log("Processed and submitted the data from batch " + batch.batchNumber);
            }
        }
        else {
@@ -45,6 +50,7 @@ function processDataBatch() {
     request.open(method, url, shouldBeAsync);
     request.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     request.send();
+    console.log("Asked for data to process.");
 }
 
 // This function executes the received animals in the batch and gathers
