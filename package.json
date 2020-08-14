@@ -13,6 +13,7 @@
     "log-timestamp": "^0.3.0",
     "morgan": "~1.7.0",
     "pug": "~2.0.0-beta6",
+    "response-time": "^2.3.2",
     "serve-favicon": "~2.3.0",
     "socket.io": "^1.7.4"
   }

@@ -1,4 +1,5 @@
 var express = require('express');
+var responseTime = require('response-time');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
@@ -11,8 +12,8 @@ var World = require('./W3PoC/world.js')
 var debug = require('debug')('app');
 require('log-timestamp');
 
-
 var app = express();
+app.use(responseTime());
 
 var world = 0;
 var batchNumber = 0;
@@ -20,11 +21,13 @@ var toBeProcessed = [];
 var doneProcessing = [];
 
 // This variable controls the size of the normal batch sent to client for processing.
-var batchSize = 1500;
+var batchSize = 10;
 
 // This variable is a pointer of sort that keeps track of how many animals
 // we've already sent for processing, and where the next batch shall begin.
 var sentForProcessing = 0;
+
+
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -100,8 +103,10 @@ app.get('/processBatch', function(req, res){
   if (sentForProcessing < world.animals.length) {
       batch = world.animals.slice(sentForProcessing, sentForProcessing + batchSize);
       sentForProcessing += batchSize;
-      //console.log("Sending " + batch.length + " animals.");
-      //console.log("Locs: " + world.locations);
+      console.log("Size of the batch:  " + JSON.stringify(batch).length + " bytes.");
+      console.log("Size of Locs: " + JSON.stringify(world.locations).length);
+
+
       var response = {"locations" : world.locations, "batch" : batch, "batchNumber" : batchNumber, "timeStamp" : Date.now()};
       res.send(response);
       console.debug("Sent batch: " + batchNumber++);
