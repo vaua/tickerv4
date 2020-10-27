@@ -2,14 +2,13 @@ var debug = require('debug')('world');
 var Animal = require('../public/javascripts/animal.js')
 var Genome = require('../public/javascripts/genome.js')
 
-const world_size = 1000;
-const init_animals = 150;
+const world_size = 10000;
+const init_animals = 1500;
 const energy_norm = 100;
 //const init_ener = 100;
 
 function World() {
     this.cycle = 0;
-    this.animals = [];
     this.animalsCreated = 0;
     this.locations = [];
     this.worldActions = [];
@@ -108,7 +107,7 @@ function setupWorld(world) {
 
         for (i = 0; i < numberOfKids; i++) {
             var child = new Animal(world.animalsCreated, energyPerKid, animal.genome, animal.orientation);
-            world.addNewAnimal(child);
+            world.animalsCreated += 1;
             world.addToLocation(animal.location, child);
         }
     }
@@ -132,15 +131,9 @@ World.prototype.createNewRandomAnimal = function() {
     //console.log("New random animal.");
     var genome = new Genome();
     var init_energy = getRandomInt(energy_norm) * genome.size
-    animal = new Animal(this.animalsCreated, init_energy, genome, this.animalsCreated % 2);
-    this.addNewAnimal(animal);
+    animal = new Animal(this.animalsCreated++, init_energy, genome, this.animalsCreated % 2);
     this.addToLocation(getRandomLocation(), animal);
 
-}
-
-World.prototype.addNewAnimal = function(animal) {
-    this.animals.push(animal);
-    this.animalsCreated += 1;
 }
 
 World.prototype.addToLocation = function(location, animal) {

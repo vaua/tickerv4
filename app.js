@@ -19,9 +19,10 @@ var world = 0;
 var batchNumber = 0;
 var toBeProcessed = [];
 var doneProcessing = [];
+var receivedBatches = 0;
 
 // This variable controls the size of the normal batch sent to client for processing.
-var batchSize = 10;
+var batchSize = 1000;
 
 // This variable is a pointer of sort that keeps track of how many animals
 // we've already sent for processing, and where the next batch shall begin.
@@ -100,14 +101,14 @@ app.get('/processBatch', function(req, res){
   //TODO: Check if host registered and regiter it if not.
 
 
-  if (sentForProcessing < world.animals.length) {
-      batch = world.animals.slice(sentForProcessing, sentForProcessing + batchSize);
+  if (sentForProcessing < world.locations.length) {
+      batch = world.locations.slice(sentForProcessing, sentForProcessing + batchSize);
       sentForProcessing += batchSize;
       console.log("Size of the batch:  " + JSON.stringify(batch).length + " bytes.");
       console.log("Size of Locs: " + JSON.stringify(world.locations).length);
 
 
-      var response = {"locations" : world.locations, "batch" : batch, "batchNumber" : batchNumber, "timeStamp" : Date.now()};
+      var response = {"batch" : batch, "batchNumber" : batchNumber, "startingLocation" : sentForProcessing - batchSize, "timeStamp" : Date.now()};
       res.send(response);
       console.debug("Sent batch: " + batchNumber++);
   } else {
@@ -124,11 +125,13 @@ app.post('/submitBatchProcessingResult', function(req, res) {
     var actions = req.body;
 
     doneProcessing.push(...actions);
+    receivedBatches++;
     //console.log("Received actions: " + actions);
     //console.log("Currently processed " + doneProcessing.length + " out of " + world.animals.length + ".");
 
 
-    if (doneProcessing.length >= world.animals.length) {
+    
+    if (receivedBatches * batchSize >= world.locations.length) {
         //console.log("scheduling world update execution.");
         // TODO: This will surely need to be fixed at some point.
         //setTimeout(executeUpdate(), 100);
@@ -158,6 +161,7 @@ app.use(function(err, req, res, next) {
   // set locals, only providing error in development
   res.locals.message = err.message;
   res.locals.error = req.app.get('env') === 'development' ? err : {};
+  console.log(err.stack);
 
   // render the error page
   res.status(err.status || 500);
@@ -190,31 +194,33 @@ function executeUpdate() {
         world.worldActions[action[0]](action[1]);
     });
 
-    world.animals.forEach(animal => {
-        // Remove the cost of the energy for animals that are alive and not plants
-        // Alive: energy > 0. Not plant: Type > first quarter.
-        if (animal.energy > 0 && animal.genome.type > 1) {
-            animal.energy -= energyLoss * animal.genome.size;
-        }
-        if (animal.energy <= 0) {
-            // Killing the energy by removing its senses(tracts).
-            animal.genome.tracts = [];
-        }
-        if (animal.energy < -(energyContent * animal.genome.size)) {
-            //Now the animal has been fully eaten, remove it from the world.
-            console.log("Removing a dead animal from the world.");
-            world.animals.remove(animal);
-        }
-    })
-
+    world.locations.filter(location => {return location != null;}).forEach(location => {
+        location.forEach(animal => {
+            // Remove the cost of the energy for animals that are alive and not plants
+            // Alive: energy > 0. Not plant: Type > first quarter.
+            if (animal.energy > 0 && animal.genome.type > 1) {
+                animal.energy -= energyLoss * animal.genome.size;
+            }
+            if (animal.energy <= 0) {
+                // Killing the energy by removing its senses(tracts).
+                animal.genome.tracts = [];
+            }
+            if (animal.energy < -(energyContent * animal.genome.size)) {
+                //Now the animal has been fully eaten, remove it from the world.
+                console.log("Removing a dead animal from the world.");
+                world.animals.remove(animal);
+            }
+        });
+    });
 
     // House keeping with the variables
 
     toBeProcessed = [];
     doneProcessing = [];
     sentForProcessing = 0;
+    receivedBatches = 0;
     world.cycle += 1;
-    console.log("Time for a new cycle " + world.cycle + ", now with " + world.animals.length + " animals.");
+    console.log("Time for a new cycle " + world.cycle + ", now with " + world.animalsCreated + " animals.");
     //console.log("Animal 1 status: " + world.animals[0].energy);
 }
 

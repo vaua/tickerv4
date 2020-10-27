@@ -114,7 +114,8 @@
 
 
 
-        // Expecting params: locations, animal
+        // Expecting params: locations, animal. Now - the object animals id is known, but if we don't send the full batch, we
+        // will not be able to fetch it. Answer - sent the full batch as parameter.
         // Will return a list of numbers representing the seen stuff that can be matched against the triggers.
         var createVisionImpressionsFromWorld = function(params) {
 
@@ -146,21 +147,26 @@
             //console.log("Currently seing: " + visible_objects);
 
             visible_objects.forEach(obj => {
-                if (obj !== animal) {
-                    if (obj === undefined) {
-                        console.log("Hm, weird. Why is an object undefined?");
+
+                if (obj.genome !== undefined) {
+                    if (obj !== animal) {
+                        if (obj === undefined) {
+                            console.log("Hm, weird. Why is an object undefined?");
+                        }
+
+                        // calculate the impression number of object.
+                        var sizeComp = obj.genome.size * Math.pow(2, (animalTypeBits + animalShapeBits + distanceBits));
+                        var shapeComp = obj.genome.shape * Math.pow(2, (animalShapeBits + distanceBits));
+                        var typeComp = obj.genome.type * Math.pow(2, distanceBits);
+                        var distanceComp = Math.abs(obj.location - animal.location);
+                        var impressionNumber =  sizeComp + shapeComp + typeComp + distanceComp;
+
+                        impressions.push([impressionNumber, obj]);
+                    } else {
+                        //console.log("Uuups, this is me :)");
                     }
-
-                    // calculate the impression number of object.
-                    var sizeComp = obj.genome.size * Math.pow(2, (animalTypeBits + animalShapeBits + distanceBits));
-                    var shapeComp = obj.genome.shape * Math.pow(2, (animalShapeBits + distanceBits));
-                    var typeComp = obj.genome.type * Math.pow(2, distanceBits);
-                    var distanceComp = Math.abs(obj.location - animal.location);
-                    var impressionNumber =  sizeComp + shapeComp + typeComp + distanceComp;
-
-                    impressions.push([impressionNumber, obj.id]);
                 } else {
-                    console.log("Uuups, this is me :)");
+                    console.log("This object had no penis.");
                 }
             });
 
@@ -303,6 +309,7 @@
 
 
         // and now internal sense? should be easier then vision :)
+        // We will be given three parameters, but will ignore locations and batch.
         var createInternalImpressionsFromWorld = function(params) {
 
             // Expecting only animal.
