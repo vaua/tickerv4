@@ -1,4 +1,4 @@
-# Ticker 4
+# Ticker v4 #
 
             Ispricacu ti jednu pricu Lucija
             jednostavnu, kao kad se ploca snima.
@@ -48,6 +48,10 @@ Once all the queued actions are executed, the household activities begin. These 
 ### Animals ###
 
 Animals are agents populating the world. Animals are initially defined by the genome that they are built around. The genome is either fully random, or inherited from a parent (with no or some mututations). The animal starts with some initial energy, random but proportional to the genome size. In each tick of the world, animal will loose some of this energy (again proportional to the genome / animal size). Once the energy falls below zero, the animal dies. To avoid this faith, the animal must eat, and more specifically it needs to eat food that fits it. This renders positive flow of energy. To eat, animal needs to be in proximity of the food, and execute proper action. This is not trivial, as there is nothing in the code saying when or how the animal should eat. This is one of the things that need to evolve in this simulation.
+
+#### Genome ####
+The genome is the mechanism that connects the animal to the world, and serves as the link between two domains. It describes the senses by which the animal can percieve the world (and how different senses interpret different inputs), as well as actuators and actions that they can produce (and that have meaning in the world). The genome also defines the private internal mechanism of the animal by which it turns sensory input into actions.
+
 
 
 
