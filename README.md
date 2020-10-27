@@ -6,11 +6,23 @@
                       Rade Serbedzija, Lucija
 
 
-**Background**
+## Background ##
 
-Ticker v4 is an attempt to make a biologically inspired simulation engine. 
+Ticker v4 is an attempt to make a biologically inspired simulation engine. The simulation consists of a "world", filled with independent agents (or "animals"). These agents receive inputs from the world, depending on what senses they posses, and then they then act back in the world, depending on their abilities and DNA they have. Animals can also choose to procreate, at which point they spread their genes. To survive, animals need energy, which they get by eating (an action they need to perform when suitable food is present). Animals have different attributes (size, shape, type) which origin from their genes, and have effect on what they eat, how much energy they use when performing different stuff. If an animal runs out of energy, it dies. When an animal procreates, it looses energy that its "kids" get.
 
-**High Goals**
+The hypotesis is that, over time, certain behavirs should arise (in dimishing probablility, or requiring longer execution time):
+- some animals will specialize in specific ways of finding food and eating, thus becoming successful
+- different survival strategies will emerge
+- Strategy of not eating / helping your "kin" (other animals that are genetically similar to yourself)
+- Strategy of cooperating with your own kin 
+- Communication?
+
+| ![alt text](assets/world_1.png?raw=true)
+|:--:| 
+| *A representation of the world (circle) and animals in different positions* |
+| *Red lines, each dot is one animal, line height indicates amount of animals in that position.* |
+
+### High level Goals ###
 - Implemented and rest points
 
 Through earlier simulations, I have drawn the conclusion that the most important element of these simulations is the evaluation speed. As positive mutations are seldom (as they should be), the pace of evolution is very, very slow once the world becomes big enough to give place for meaningsful evolution and exploration.
