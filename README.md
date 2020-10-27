@@ -1,9 +1,9 @@
 # Ticker 4
 
-_Ispricacu ti jednu pricu Lucija_
-_jednostavnu, kao kad se ploca snima_
+            _Ispricacu ti jednu pricu Lucija_
+            _jednostavnu, kao kad se ploca snima_
 
-            Rade Serbedzija, Lucija
+                      Rade Serbedzija, Lucija
 
 
 Background
