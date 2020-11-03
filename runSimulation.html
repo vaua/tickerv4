@@ -6,6 +6,62 @@
     <script src="javascripts/genome.js"></script>
     <script src="javascripts/host.js"></script>
 </head>
+<link rel = "stylesheet" href="stylesheets/style.css">
 <body onload="processDataBatch()">
-        <canvas id="surface" width="700" height="700">Canvas not Supported</canvas>
+    <div>
+        <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
+        <div class="stats">Statistics
+            <table id="worldTable">
+                <tr>
+                    <th>Item</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>World Tick</td>
+                    <td id="tickNr"></td>
+                </tr>
+                <tr>
+                    <td>Animals Created</td>
+                    <td id="animalsCreated"></td>
+                </tr>
+                <tr>
+                    <td>Animals Dead</td>
+                    <td id="animalsDead"></td>
+                </tr>
+                <tr>
+                    <td>Animals Removed</td>
+                    <td id="animalsRemoved"></td>
+                </tr>
+
+                <tr>
+                    <td>Actions last turn</td>
+                    <td id="actionsLastTick"></td>
+                </tr>
+                <tr>
+                    <td>Animals processed last turn</td>
+                    <td id="animalsProcessed"></td>
+                </tr>
+
+                <tr>
+                    <td>Total location changes</td>
+                    <td id="locationChanged"></td>
+                </tr>
+                <tr>
+                    <td>Total energy changes</td>
+                    <td id="energyChanged"></td>
+                </tr>
+                <tr>
+                    <td>Total affinity changed</td>
+                    <td id="affinityChanged"></td>
+                </tr>
+                <tr>
+                    <td>Total births given</td>
+                    <td id="birthsGiven"></td>
+                </tr>
+
+
+            </table>
+           
+        </div>
+    </div>
 </body>

@@ -5,6 +5,8 @@ var canvas;
 var ctx;
 var gene = new Genome();
 
+const radius = 80;
+const origo = 500;
 
 
 var idleTimeBeforeNextRequestAttempt = 100;
@@ -90,6 +92,7 @@ function runAnimals(batchData) {
     //var animalBatch = batchData["batch"];
     var actions = [];
     var startingLocation = batchData["startingLocation"];
+    var stats = batchData["stats"];
 
     // parse through all animals, add 1
     var nonNullLocations = locations.filter( el => { return el !== null });
@@ -169,24 +172,22 @@ function runAnimals(batchData) {
 
 
     // Update image
-    updateImage(locations);
+    updateImage(locations, stats);
 
     return actions;
 }
 
 
 // This function paints an update based on animal locations.
-function updateImage(locations) {
+function updateImage(locations, stats) {
 
-    const radius = 30;
-    const origo = 350;
     ctx.beginPath();
     ctx.arc(origo, origo, radius, 0, 2 * Math.PI);
     ctx.stroke();
 
-    ctx.fillStyle = "#FF0000";
     locations.forEach(location => {
         var o = 0;
+        var b = 0;
         if (location == null) return;
         location.forEach(animal => {
 
@@ -194,12 +195,38 @@ function updateImage(locations) {
             // Radius r
             // Tra  nslate location l into x, y on circle r
             // 2pi / max * location = angle
-            o += 1;
-            var angle = Math.PI * animal.location * 2 / locations.length;
-            var x = origo + Math.cos(angle) * (radius + o);
-            var y = origo + Math.sin(angle) * (radius + o);
-            ctx.fillRect( x, y, 2, 2 );
+            
+            if (animal.genome.type > 1) {
+                if (b < origo) b += 1;
+                ctx.fillStyle = "#FF0000";
+                var angle = Math.PI * animal.location * 2 / locations.length;
+                var x = origo + Math.cos(angle) * (radius + b);
+                var y = origo + Math.sin(angle) * (radius + b);
+                ctx.fillRect( x, y, 2, 2 );
+            }
+            else {
+                o += 1;
+                ctx.fillStyle = "#00FFFF";
+                var angle = Math.PI * animal.location * 2 / locations.length;
+                var x = origo + Math.cos(angle) * (radius - o);
+                var y = origo + Math.sin(angle) * (radius - o);
+                ctx.fillRect( x, y, 2, 2 );
+            }
+            
         })
     })
     ctx.stroke();
+
+    // Update stats
+    document.getElementById("tickNr").innerHTML = stats.tickNr;
+    document.getElementById("animalsCreated").innerHTML = stats.animalsCreated;
+    document.getElementById("animalsDead").innerHTML = stats.animalsDead;
+    document.getElementById("animalsRemoved").innerHTML = stats.animalsRemoved;
+    document.getElementById("actionsLastTick").innerHTML = stats.actionsLastTick;
+    document.getElementById("animalsProcessed").innerHTML = stats.animalsProcessed;
+    document.getElementById("locationChanged").innerHTML = stats.locationChanged;
+    document.getElementById("energyChanged").innerHTML = stats.energyChanged;
+    document.getElementById("affinityChanged").innerHTML = stats.affinityChanged;
+    document.getElementById("birthsGiven").innerHTML = stats.birthsGiven;
+
 }

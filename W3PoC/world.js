@@ -1,17 +1,27 @@
+var world;
 var debug = require('debug')('world');
 var Animal = require('../public/javascripts/animal.js')
 var Genome = require('../public/javascripts/genome.js')
 
 const world_size = 10000;
-const init_animals = 1500;
+const init_animals = 2000;
 const energy_norm = 100;
 //const init_ener = 100;
 
+
 function World() {
     this.cycle = 0;
-    this.animalsCreated = 0;
     this.locations = [];
     this.worldActions = [];
+    this.stats = {};
+    this.stats.tickNr = 0;
+    this.stats.animalsCreated = 0;
+    this.stats.animalsDead = 0;
+    this.stats.animalsRemoved = 0;
+    this.stats.locationChanged = 0;
+    this.stats.energyChanged = 0;
+    this.stats.affinityChanged = 0;
+    this.stats.birthsGiven = 0;
 
     debug("Starting world.");
 
@@ -21,6 +31,7 @@ function World() {
     // create Initial creatures
     this.createInitialCreatures();
 
+    world = this;
 }
 
 function setupWorld(world) {
@@ -52,6 +63,7 @@ function setupWorld(world) {
             location[animal.location + locationDelta].push(animal);
             // Now, fix the location on the animal.
             animal.location += locationDelta;
+            world.stats.locationChanged++;
         }
     }
 
@@ -66,6 +78,7 @@ function setupWorld(world) {
         debug("Changing energy " + energyDelta + " for animal " + animal.id);
 
         animal.energy += energyDelta;
+        world.stats.energyChanged++;
     }
 
     var changeAffinity = function(params) {
@@ -84,6 +97,7 @@ function setupWorld(world) {
         //console.log(animal.affinities);
         animal.affinities[sense][tract] += delta;
         //console.log("Done changing.");
+        world.stats.affinityChanged++;
     }
 
     var giveBirth = function(params) {
@@ -106,10 +120,12 @@ function setupWorld(world) {
         debug("Giving birth to " + numberOfKids + " kids!");
 
         for (i = 0; i < numberOfKids; i++) {
-            var child = new Animal(world.animalsCreated, energyPerKid, animal.genome, animal.orientation);
-            world.animalsCreated += 1;
+            var child = new Animal(world.stats.animalsCreated, energyPerKid, animal.genome, animal.orientation);
+            world.stats.animalsCreated += 1;
             world.addToLocation(animal.location, child);
         }
+
+        world.stats.birthsGiven += numberOfKids;
     }
 
     world.worldActions.push(changeLocation);
@@ -131,7 +147,7 @@ World.prototype.createNewRandomAnimal = function() {
     //console.log("New random animal.");
     var genome = new Genome();
     var init_energy = getRandomInt(energy_norm) * genome.size
-    animal = new Animal(this.animalsCreated++, init_energy, genome, this.animalsCreated % 2);
+    animal = new Animal(this.stats.animalsCreated++, init_energy, genome, this.stats.animalsCreated % 2);
     this.addToLocation(getRandomLocation(), animal);
 
 }

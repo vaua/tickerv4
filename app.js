@@ -104,11 +104,11 @@ app.get('/processBatch', function(req, res){
   if (sentForProcessing < world.locations.length) {
       batch = world.locations.slice(sentForProcessing, sentForProcessing + batchSize);
       sentForProcessing += batchSize;
-      console.log("Size of the batch:  " + JSON.stringify(batch).length + " bytes.");
-      console.log("Size of Locs: " + JSON.stringify(world.locations).length);
+      //console.log("Size of the batch:  " + JSON.stringify(batch).length + " bytes.");
+      //console.log("Size of Locs: " + JSON.stringify(world.locations).length);
 
 
-      var response = {"batch" : batch, "batchNumber" : batchNumber, "startingLocation" : sentForProcessing - batchSize, "timeStamp" : Date.now()};
+      var response = {"batch" : batch, "batchNumber" : batchNumber, "startingLocation" : sentForProcessing - batchSize, "stats" : world.stats, "timeStamp" : Date.now()};
       res.send(response);
       console.debug("Sent batch: " + batchNumber++);
   } else {
@@ -180,20 +180,22 @@ function executeUpdate() {
     var energyLoss = 2;
     var energyContent = 5;
 
-    console.log("Executing update.");
+    //console.log("Executing update.");
     doneProcessing = doneProcessing.flat();
-    console.log("flattened.");
+    //console.log("flattened.");
     doneProcessing = doneProcessing.filter(function(el) {
         //console.log("EL: " + el);
         return (el != null && el.length > 0);
     });
 
     //console.log("filtered.");
-    console.log("There are " + doneProcessing.length + " actions contributed.");
+    world.stats.actionsLastTick = doneProcessing.length;
     doneProcessing.forEach(action => {
+        console.log("Action: " + action[0] +", " + action[1]);
         world.worldActions[action[0]](action[1]);
     });
 
+    world.stats.animalsProcessed = 0;
     world.locations.filter(location => {return location != null;}).forEach(location => {
         location.forEach(animal => {
             // Remove the cost of the energy for animals that are alive and not plants
@@ -201,15 +203,20 @@ function executeUpdate() {
             if (animal.energy > 0 && animal.genome.type > 1) {
                 animal.energy -= energyLoss * animal.genome.size;
             }
-            if (animal.energy <= 0) {
+            if (animal.energy <= 0 && animal.genome.tracts.length > 0) {
                 // Killing the energy by removing its senses(tracts).
                 animal.genome.tracts = [];
+                animal.genome.type = 0;
+                world.stats.animalsDead++;
             }
-            if (animal.energy < -(energyContent * animal.genome.size)) {
+            //if (animal.energy < -(energyContent * animal.genome.size)) {
+            if (animal.energy < -2) {
                 //Now the animal has been fully eaten, remove it from the world.
                 console.log("Removing a dead animal from the world.");
-                world.animals.remove(animal);
+                world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);
+                world.stats.animalsRemoved++;
             }
+            world.stats.animalsProcessed++;
         });
     });
 
@@ -220,7 +227,8 @@ function executeUpdate() {
     sentForProcessing = 0;
     receivedBatches = 0;
     world.cycle += 1;
-    console.log("Time for a new cycle " + world.cycle + ", now with " + world.animalsCreated + " animals.");
+    //console.log("Time for a new cycle " + world.cycle + ", now with " + world.stats.animalsCreated + " animals.");
+    world.stats.tickNr++;
     //console.log("Animal 1 status: " + world.animals[0].energy);
 }
 
