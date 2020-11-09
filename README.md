@@ -128,6 +128,19 @@ When asked to generate genome sequence, internal will create the following:
 - Action, a random number represented by 5 bits. This will be interpretted either as move action (forth or back), or eat action.
 - Affinity, initially a random number representing the affinity of this action (to be adjusted during animal life, through other actions)
 
+When asked to create an input from the world, internal will look into the animal itself. It will create an impression based on two factors: animals current energy level, and the change of animals energy level since last time. Both of these will provide two bytes of impression, putting the total internal impression at 4 bytes large. Currenty, this is the translation table:
+
+First two bytes:
+- animal has more than 85% energy: 3
+- animal has more than 50% energy: 2
+- enimal has more than 15% energy: 1
+- animal has less than 15% energy: 0
+
+Last two bytes:
+- Animal got more than 10% energy: 3
+- Animal got less than 10% energy: 2
+- Animal lost between 0 and 10% energy: 1
+- Animal lost more than 10% energy in last tick: 0
 
 
 
