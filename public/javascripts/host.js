@@ -93,6 +93,12 @@ function runAnimals(batchData) {
     var actions = [];
     var startingLocation = batchData["startingLocation"];
     var stats = batchData["stats"];
+    
+    stats.batchNumber = batchData["batchNumber"];
+    stats.batchSendTime = batchData["timeStamp"];
+    stats.batchReceptionTime = Date.now();
+    stats.batchStartingLocation = startingLocation;
+    stats.batchAnimalsProcessed = 0;
 
     // parse through all animals, add 1
     var nonNullLocations = locations.filter( el => { return el !== null });
@@ -118,15 +124,18 @@ function runAnimals(batchData) {
                 // get Impression from the sense, second method of the three.
                 // returns the impression number as well as id of the "object" that caused the impression.
                 var impressions = senses[sense][1]([locations, animal]);
-                //console.log("Sense is " + sense + ", seing " + impressions);
+                if (sense == 0 && impressions.length > 0) {
+                    console.log("Sense is " + sense + ", seing " + impressions);
+                }
 
                 // Check, for each impression, it any of the tracts is triggered.
                 for (var i = 0; i < impressions.length; i++) {
                     var tractsOfThisSense = animal.genome.tracts[sense];
+                    
                     for (var t = 0; t < tractsOfThisSense.length; t++) {
                         var tract = tractsOfThisSense[t];
                         var trigger = tract.trigger;
-                        //console.log("Checking " + impressions[i] + " against tract " + trigger);
+                        console.log("Checking " + impressions[i][0] + " against tract " + trigger);
 
                         if (impressions[i][0] == trigger) {
                             //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
@@ -165,11 +174,13 @@ function runAnimals(batchData) {
             }
 
             actions.push(animalActions);
+            stats.batchAnimalsProcessed ++;
         });
     });
 
     // Done with all actions.
-
+    stats.batchProcessedTime = Date.now();
+    stats.batchTotalActions = actions.length;
 
     // Update image
     updateImage(locations, stats);
@@ -218,6 +229,7 @@ function updateImage(locations, stats) {
     ctx.stroke();
 
     // Update stats
+    // World stats
     document.getElementById("tickNr").innerHTML = stats.tickNr;
     document.getElementById("animalsCreated").innerHTML = stats.animalsCreated;
     document.getElementById("animalsDead").innerHTML = stats.animalsDead;
@@ -228,5 +240,15 @@ function updateImage(locations, stats) {
     document.getElementById("energyChanged").innerHTML = stats.energyChanged;
     document.getElementById("affinityChanged").innerHTML = stats.affinityChanged;
     document.getElementById("birthsGiven").innerHTML = stats.birthsGiven;
+    document.getElementById("tickDuration").innerHTML = stats.tickDuration;
+    document.getElementById("executionDuration").innerHTML = stats.executionDuration;
+    document.getElementById("tickedPerSecond").innerHTML = stats.animalsTickedPerSecond;
 
+    document.getElementById("batchNumber").innerHTML = stats.batchNumber;
+    document.getElementById("batchSendTime").innerHTML = stats.batchSendTime;
+    document.getElementById("batchStart").innerHTML = stats.batchStartingLocation;
+    document.getElementById("batchTransportTime").innerHTML = stats.batchReceptionTime - stats.batchSendTime;
+    document.getElementById("batchProcessingDuration").innerHTML = stats.batchProcessedTime - stats.batchReceptionTime;
+    document.getElementById("batchAnimalsProcessed").innerHTML = stats.batchAnimalsProcessed;
+    document.getElementById("batchTotalActions").innerHTML = stats.batchTotalActions;
 }

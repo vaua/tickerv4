@@ -10,6 +10,7 @@
     const distanceBits = 3;
     const visionActionBits = 5;
     const affinityBits = 4;
+    const maxTracts = 32;
 
     function Genome() {
 
@@ -53,7 +54,7 @@
             for (var s = 0; s < senses.length; s++)  {
                 this.tracts[s] = [];
                 ///console.log("There are " + senses.length + " senses in the genome.");
-                var numberOfTracts = getRandomInt(32);
+                var numberOfTracts = getRandomInt(maxTracts);
                 for (var i = 0; i < numberOfTracts; i++) {
                     //console.log("Sense is: " + senses[s][0]);
                     var tract = senses[s][0]();
@@ -71,7 +72,7 @@
 
     // This function will create the senses available along with all the help functions they have.
     function createSenses() {
-        console.log("Creating senses.");
+        //console.log("Creating senses.");
         var s = [];
 
         // Each sense will have 3 main functions:
@@ -198,10 +199,10 @@
                 }
 
                 // New location = current + distance
-                var newLocation = animal.location + newLocation;
+                //var newLocation = animal.location + distance;
 
                 // Returning world action 0 (move) and three parameters.
-                return [0, [animal, newLocation]];
+                return [0, [animal, distance]];
             } else {
 
                 // The animal is attempting to eat. There should be one more parameter.
@@ -361,7 +362,7 @@
             var animal = params[0];
             var action = params[1];
 
-            if (action < Math.pow(2, (internalActionBits - 1))) {
+            if (action < Math.pow(2, (internalActionBits - 1)) + 120) {
                 // The action is to adjust affinity
 
                 var tractToAdjust = action % 32;
@@ -396,8 +397,9 @@
         //console.log("Vision sense: " + vision);
         //console.log("Internal sense: " + internal);
 
-
         s.push(vision, internal);
+        // TODO: temporary changed to include only vision!
+        //s.push(vision);
 
         //console.log("Created senses, vision and internal.: " + senses[0]);
         return s;

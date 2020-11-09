@@ -8,7 +8,8 @@ var bodyParser = require('body-parser');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var World = require('./W3PoC/world.js')
+var World = require('./W3PoC/world.js');
+const { start } = require('repl');
 var debug = require('debug')('app');
 require('log-timestamp');
 
@@ -20,6 +21,7 @@ var batchNumber = 0;
 var toBeProcessed = [];
 var doneProcessing = [];
 var receivedBatches = 0;
+var startOfTick = 0;
 
 // This variable controls the size of the normal batch sent to client for processing.
 var batchSize = 1000;
@@ -36,8 +38,8 @@ app.set('view engine', 'pug');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(bodyParser.json({ limit: '10mb' }));
-app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
+app.use(bodyParser.json({ limit: '50mb' }));
+app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
@@ -100,6 +102,10 @@ app.get('/processBatch', function(req, res){
 
   //TODO: Check if host registered and regiter it if not.
 
+  // Check if first batch in tick
+  if (startOfTick == 0) {
+      startOfTick = Date.now();
+  }
 
   if (sentForProcessing < world.locations.length) {
       batch = world.locations.slice(sentForProcessing, sentForProcessing + batchSize);
@@ -177,6 +183,7 @@ app.use(function(err, req, res, next) {
 
 function executeUpdate() {
 
+    var startOfExecution = Date.now();
     var energyLoss = 2;
     var energyContent = 5;
 
@@ -210,9 +217,9 @@ function executeUpdate() {
                 world.stats.animalsDead++;
             }
             //if (animal.energy < -(energyContent * animal.genome.size)) {
-            if (animal.energy < -2) {
+            if (animal.energy < 0) {
                 //Now the animal has been fully eaten, remove it from the world.
-                console.log("Removing a dead animal from the world.");
+                console.log("Removing a dead animal from the world, from location " + animal.location + " with length " + world.locations[animal.location].length);
                 world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);
                 world.stats.animalsRemoved++;
             }
@@ -229,7 +236,11 @@ function executeUpdate() {
     world.cycle += 1;
     //console.log("Time for a new cycle " + world.cycle + ", now with " + world.stats.animalsCreated + " animals.");
     world.stats.tickNr++;
+    world.stats.tickDuration = Date.now() - startOfTick;
+    world.stats.executionDuration = Date.now() - startOfExecution;
+    world.stats.animalsTickedPerSecond = (world.stats.animalsProcessed * 1000) / world.stats.tickDuration;
     //console.log("Animal 1 status: " + world.animals[0].energy);
+    startOfTick = 0;
 }
 
 module.exports = app;

@@ -3,8 +3,8 @@ var debug = require('debug')('world');
 var Animal = require('../public/javascripts/animal.js')
 var Genome = require('../public/javascripts/genome.js')
 
-const world_size = 10000;
-const init_animals = 2000;
+const world_size = 5000;
+const init_animals = 5000;
 const energy_norm = 100;
 //const init_ener = 100;
 
@@ -40,34 +40,39 @@ function setupWorld(world) {
     // changeLocation, changeEnergy, changeAffinity, giveBirth
 
     // Change location will take locations, animal, delta as params.
-    var changeLocation = function(params) {
-        if (params.length != 3) {
+    var changeLocation = function (params) {
+        if (params.length != 2) {
             console.log("Wrong amount of params given to changeLocation action!");
             return;
         }
 
 
         // Assign the args
-        var locations = params[0];
-        var animal = params[1];
-        var locationDelta = params[2];
+        var animal = params[0];
+        var locationDelta = params[1];
 
-        debug("Changing location for animal " + animal.id + " with delta " + locationDelta);
+        console.log("Changing location for animal " + animal.id + " with delta " + locationDelta);
+        console.log("Current animal localtion is: " + animal.location + ", in world location: " + world.locations[animal.location]);
 
         // Check that the animal is in the location it says it is.
-        if (animal in locations[animal.location]) {
+        if (checkCorrectLocation(animal, world.locations)) {
+            var newLocation = (animal.location + locationDelta) % world_size;
+            
             // Update the location, and the animal location.
             // First, remove the animal from the location it is in.
-            locations[animal.location].splice(locations[animal.location].indexOf(animal), 1);
+            world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);
+            
             // Then, add it to the new location.
-            location[animal.location + locationDelta].push(animal);
-            // Now, fix the location on the animal.
-            animal.location += locationDelta;
+            world.addToLocation(newLocation, animal);
+
+            console.log("New location is: " + animal.location);
             world.stats.locationChanged++;
+        } else {
+            console.log("Something is corrupted, the location of the animal is wrong.");
         }
     }
 
-    var changeEnergy = function(params) {
+    var changeEnergy = function (params) {
         if (params.length != 2) {
             console.log("Wrong amount of params given to changeEnergy action!");
             return;
@@ -81,7 +86,7 @@ function setupWorld(world) {
         world.stats.energyChanged++;
     }
 
-    var changeAffinity = function(params) {
+    var changeAffinity = function (params) {
         if (params.length != 4) {
             console.log("Wrong amount of params given to changeAffinity action!");
             return;
@@ -100,7 +105,7 @@ function setupWorld(world) {
         world.stats.affinityChanged++;
     }
 
-    var giveBirth = function(params) {
+    var giveBirth = function (params) {
         if (params.length != 3) {
             console.log("Wrong amount of params given to giveBirth action!");
             return;
@@ -137,13 +142,13 @@ function setupWorld(world) {
 
 }
 
-World.prototype.createInitialCreatures = function() {
+World.prototype.createInitialCreatures = function () {
     for (var i = 0; i < init_animals; i++) {
         this.createNewRandomAnimal();
     }
 }
 
-World.prototype.createNewRandomAnimal = function() {
+World.prototype.createNewRandomAnimal = function () {
     //console.log("New random animal.");
     var genome = new Genome();
     var init_energy = getRandomInt(energy_norm) * genome.size
@@ -152,7 +157,7 @@ World.prototype.createNewRandomAnimal = function() {
 
 }
 
-World.prototype.addToLocation = function(location, animal) {
+World.prototype.addToLocation = function (location, animal) {
     if (this.locations[location] != null) {
         if (animal in this.locations[location]) {
             console.log("Animal already in this location!");
@@ -175,17 +180,27 @@ World.prototype.addToLocation = function(location, animal) {
     }
 }
 
-World.prototype.remove = function(location, animal) {
+World.prototype.remove = function (location, animal) {
     console.log("Removing the animal.... not implemented yet!");
 }
 
 function getRandomInt(max) {
-  return Math.floor(Math.random() * Math.floor(max));
+    return Math.floor(Math.random() * Math.floor(max));
 }
 
 
 function getRandomLocation() {
     return getRandomInt(world_size);
+}
+
+function checkCorrectLocation(animal, locations) {
+    for (var i = 0; i < locations[animal.location].length; i++) {
+        if (locations[animal.location][i].id = animal.id) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 module.exports = World;

@@ -10,7 +10,7 @@
 <body onload="processDataBatch()">
     <div>
         <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
-        <div class="stats">Statistics
+        <div class="stats">World Statistics
             <table id="worldTable">
                 <tr>
                     <th>Item</th>
@@ -58,10 +58,65 @@
                     <td>Total births given</td>
                     <td id="birthsGiven"></td>
                 </tr>
+                <tr>
+                    <td>Last tick duration</td>
+                    <td id="tickDuration"></td>
+                </tr>
+                <tr>
+                    <td>Execution duration</td>
+                    <td id="executionDuration"></td>
+                </tr>
+                <tr>
+                    <td>Ticks per second</td>
+                    <td id="tickedPerSecond"></td>
+                </tr>
+
+            </table>
+           
+        </div>
+
+
+        <div>Last Batch Statistics
+            <table id="batchTable">
+                <tr>
+                    <th>Item</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td>Batch number</td>
+                    <td id="batchNumber"></td>
+                </tr>
+                <tr>
+                    <td>Batch Send Time</td>
+                    <td id="batchSendTime"></td>
+                </tr>
+                <tr>
+                    <td>Starting location</td>
+                    <td id="batchStart"></td>
+                </tr>
+                <tr>
+                    <td>Transport time</td>
+                    <td id="batchTransportTime"></td>
+                </tr>
+
+                <tr>
+                    <td>Processing duration</td>
+                    <td id="batchProcessingDuration"></td>
+                </tr>
+                <tr>
+                    <td>Animals processed in batch</td>
+                    <td id="batchAnimalsProcessed"></td>
+                </tr>
+
+                <tr>
+                    <td>Total actions generated</td>
+                    <td id="batchTotalActions"></td>
+                </tr>
 
 
             </table>
            
         </div>
+
     </div>
 </body>
