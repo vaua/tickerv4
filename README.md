@@ -81,41 +81,16 @@ When asked to generate genome sequence, vision will create the following:
 - Action, a random number represented by 5 bits. This will be interpretted either as move action (forth or back), or eat action.
 - Affinity, initially a random number representing the affinity of this action (to be adjusted during animal life, through other actions)
 
-
+###### World input to impression #######
 When asked to create a vision input from the absolute world information, vision sense will iterate through all animals withing locations nearby (within visible range) and create an impression for each of these, consisting of their size, type, shape, as well as the distance from the observing animal. These impressions are presented to the observing animal.
 
+###### Impression to action #######
 When asked to translate animal action to absolute world action, the vision will first decide whether if was move of eat. If move, it will calculate and provide the new absolute location for the animal. If it was eat, it will do the following:
 
-                // Identify the food.
+- Identify the food. If presumptive food is dead, then consume it. The type will indicate the change of energy. If presumptive food is alive, you have attacked it. Calculate the energy reduction for it. 
 
-                // If presumptive food is dead, then consume it. The type will indicate the change of energy.
-                // If presumptive food is alive, you have attacked it. Calculate the energy reduction for it.
-
-                // Food are "animals" as well, with specific type and energy (and shape).
-                // Initially, they will grow every cycle. But when eaten, they will dissapear.
-
-                // Animals that are killed must "look" different than animals that are alive.
-                // Shall their type be set to a low number (and plants are already a low number to begin with?)
-
-                // Idea - lower half of type are plants / dead aninals. Higer half are alive
-                // animals. when animals eat, their energy intake is proportional to how close food type
-                // is to type-1/2 type span of animal.
-                // Wait, no good. Like this - alive plant eater gets most out of eating plants.
-                // It gets almost nothing from eating dead animals or attacking alive ones.
-                // Carnivores get almost nothing out of eating plants. But they should get good
-                // energy out of eating dead herbivores.
-
-                // So, this is the formula: when alive, animals are in the higher half of the type.
-                // Third quadrant are herbivours, which go over to carnivours. Lower half -
-                // First quadrant are plants, second are dead animals.
-                // Eating: energi = abs(myType - foodType - 2^(typeBits-1)
-                // Dying: type = type / 2 - 2^(typeBits-1)
-
-                // Just det - huvuddistinktionen mellan animals and plants is that plants
-                // do not have vision or internal senses, and their ticking will go very fast.
-                // Also, they will be given energy in every turn. Now, initially, they will not
-                // be multiplying, but that can change later...
-
+- Food are "animals" as well, with specific type and energy (and shape). Initially, they will grow every cycle. But when eaten, they will dissapear. 
+- The main distinction between animals and plants is that plants do not have vision or internal senses, and their ticking will go very fast. Also, they will be given energy in every turn. Now, initially, they will not be multiplying, but that can change later...
 
 So to recap: Carnivors either eat dead animals, or atack and kill and then eat living animals. Herbivors eat plants. In the end, the appropriate amount of energy will be added to the eating animal, and removed from the living animal / plant.
 
@@ -128,6 +103,7 @@ When asked to generate genome sequence, internal will create the following:
 - Action, a random number represented by 5 bits. This will be interpretted either as move action (forth or back), or eat action.
 - Affinity, initially a random number representing the affinity of this action (to be adjusted during animal life, through other actions)
 
+###### World input to impressions #######
 When asked to create an input from the world, internal will look into the animal itself. It will create an impression based on two factors: animals current energy level, and the change of animals energy level since last time. Both of these will provide two bytes of impression, putting the total internal impression at 4 bytes large. Currenty, this is the translation table:
 
 First two bytes:
@@ -142,6 +118,22 @@ Last two bytes:
 - Animal lost between 0 and 10% energy: 1
 - Animal lost more than 10% energy in last tick: 0
 
+###### Impression to action #######
+In its turn, this world input from internal sense produces an action in the animal. Following actions are possible:
+- Adjusting affinity: each action that is triggered by the world impressions has an affinity connected to it. If several actions are triggered simultanously, the action with highest trigger will win. Animal can adjust affinity of different actions, based on the internal input. This represents learning during lifetime.
+- Giving birth: some internal inputs will signal to animal that it is time to give birth. Animal will then give birth to specified number of children, and provide them with specific initial amount of energy.
+
+So, for each animal, the ticking of it will have the following steps:
+- for each sense that animal has, create an input impression, which is what animal percieves through that sense. Apply this perception to animal's triggers, and check is any of the genes gets triggered. For each triggered gene, return an action that world will be able to use to calculate a change in the world. 
+
+The senses translate world so it can be applied to genes, and actions translate the will of the animal (content of genes) back to the world.
+
+
+#### Survival, thriving, evolving ####
+Each animal starts with specified amount of energy (either through allotment, or by getting it from parent). In each turn, animal will lose some energy, depending on its size. It will also loose energy for different actions, like moving or duplicating. Animal must thus eat. Animal must also eat such food that it is meant to eat (depending on its type) - herbivors will get most energy out of plants, carnivors out of living or dead animals. Type is not binary but gliding, and so is the yield of food. Animals that eat well, get a lot of ofspring, that in their turn survive and eat well will thrive and their gene should spread over the world. 
+Mutations and fully random animals provide new genes for the world, in its constant search for better genes.
+
+It is important to note here that there is almost no programin involved here, and nothing tells animals what to do. They do not "know" that eating is good for them, they will get a signal that their energy level has changes, but there is nothing saying how to interpret this. They have no idea what type of animal they are (herbivore or carnivore) they don't understand what moving means... and so on. Animals are fully mechanic, with its genes and trigger/action pairs (tracts) telling them what to do in each situation (and these are either random or inherited).
 
 
 
