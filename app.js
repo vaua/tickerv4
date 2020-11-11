@@ -24,7 +24,7 @@ var receivedBatches = 0;
 var startOfTick = 0;
 
 // This variable controls the size of the normal batch sent to client for processing.
-var batchSize = 1000;
+var batchSize = 500;
 
 // This variable is a pointer of sort that keeps track of how many animals
 // we've already sent for processing, and where the next batch shall begin.
@@ -198,7 +198,7 @@ function executeUpdate() {
     //console.log("filtered.");
     world.stats.actionsLastTick = doneProcessing.length;
     doneProcessing.forEach(action => {
-        console.log("Action: " + action[0] +", " + action[1]);
+        //console.log("Action: " + action[0] +", " + action[1]);
         world.worldActions[action[0]](action[1]);
     });
 
@@ -219,7 +219,7 @@ function executeUpdate() {
             //if (animal.energy < -(energyContent * animal.genome.size)) {
             if (animal.energy < 0) {
                 //Now the animal has been fully eaten, remove it from the world.
-                console.log("Removing a dead animal from the world, from location " + animal.location + " with length " + world.locations[animal.location].length);
+                //console.log("Removing a dead animal from the world, from location " + animal.location + " with length " + world.locations[animal.location].length);
                 world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);
                 world.stats.animalsRemoved++;
             }

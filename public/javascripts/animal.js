@@ -6,7 +6,6 @@
         this.genome = genome;
         this.orientation = orientation;
         this.affinities = [];
-        this.target;
 
 //        console.log("Affinities initated to " + this.affinities);
         for (var a = 0; a < 2; a++) {
@@ -15,11 +14,6 @@
                 this.affinities[a][b] = 0;
             }
         }
-
-        //console.log(this.affinities);
-
-
-        //debug("Creating animal " + this.id);
     }
 
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {

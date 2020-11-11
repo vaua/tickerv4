@@ -28,24 +28,25 @@ function processDataBatch() {
 
     request.onload = function () {
 
-       var status = request.status;
-       if (status == 200) {
-           var updatedData = request.responseText;
+        var status = request.status;
+        if (status == 200) {
+            var updatedData = request.responseText;
 
-           if ('"status" : 0'.localeCompare(updatedData) == 0) {
-	       console.log("No data to be processed available. Idling for some time before asking again.");
-               setTimeout(processDataBatch(), idleTimeBeforeNextRequestAttempt);
-           } else {
-               console.log("Received data batch with length " + updatedData.length + ".");
-	       var batch = JSON.parse(updatedData);
-               console.log("Parsed data batch " + batch.batchNumber + ", created: " + (Date.now() - batch.timeStamp) + " ms ago.");
-               executeAndSubmitResult(batch);
-	       console.log("Processed and submitted the data from batch " + batch.batchNumber);
-           }
-       }
-       else {
-           console.log("Something went horribly wrong!");
-       }
+            if ('"status" : 0'.localeCompare(updatedData) == 0) {
+                console.log("No data to be processed available. Idling for some time before asking again.");
+                setTimeout(processDataBatch(), idleTimeBeforeNextRequestAttempt);
+            } else {
+                //console.log("Received data batch with length " + updatedData.length + ".");
+                var batch = JSON.parse(updatedData);
+                batch.size = updatedData.length;
+                //console.log("Parsed data batch " + batch.batchNumber + ", created: " + (Date.now() - batch.timeStamp) + " ms ago.");
+                executeAndSubmitResult(batch);
+                //console.log("Processed and submitted the data from batch " + batch.batchNumber);
+            }
+        }
+        else {
+            console.log("Something went horribly wrong!");
+        }
 
     }
 
@@ -99,12 +100,20 @@ function runAnimals(batchData) {
     stats.batchReceptionTime = Date.now();
     stats.batchStartingLocation = startingLocation;
     stats.batchAnimalsProcessed = 0;
+    stats.batchSize = batchData["size"];
+
 
     // parse through all animals, add 1
+    var parsingStart = Date.now();
     var nonNullLocations = locations.filter( el => { return el !== null });
+    console.log("Parsing took " + Date.now() - parsingStart); 
+    
+    var currentMoment = Date.now();
     nonNullLocations.forEach(location => {
         location.forEach(animal => {
 
+            //console.log("Processing of last animal took " + (Date.now() - currentMoment));
+            currentMoment = Date.now();
             // For this animal, go through each sense, check the impressions,
             // and for each impression, see if it triggers anything.
             // If it triggers, check if higher than affinity before. If so,
@@ -124,9 +133,9 @@ function runAnimals(batchData) {
                 // get Impression from the sense, second method of the three.
                 // returns the impression number as well as id of the "object" that caused the impression.
                 var impressions = senses[sense][1]([locations, animal]);
-                if (sense == 0 && impressions.length > 0) {
-                    console.log("Sense is " + sense + ", seing " + impressions);
-                }
+                // if (sense == 0 && impressions.length > 0) {
+                //     console.log("Sense is " + sense + ", seing " + impressions);
+                // }
 
                 // Check, for each impression, it any of the tracts is triggered.
                 for (var i = 0; i < impressions.length; i++) {
@@ -135,7 +144,7 @@ function runAnimals(batchData) {
                     for (var t = 0; t < tractsOfThisSense.length; t++) {
                         var tract = tractsOfThisSense[t];
                         var trigger = tract.trigger;
-                        console.log("Checking " + impressions[i][0] + " against tract " + trigger);
+                        //console.log("Checking " + impressions[i][0] + " against tract " + trigger);
 
                         if (impressions[i][0] == trigger) {
                             //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
@@ -183,14 +192,17 @@ function runAnimals(batchData) {
     stats.batchTotalActions = actions.length;
 
     // Update image
+    
     updateImage(locations, stats);
-
+    
     return actions;
 }
 
 
 // This function paints an update based on animal locations.
 function updateImage(locations, stats) {
+
+    stats.imageUpdateTimeStart = Date.now();
 
     ctx.beginPath();
     ctx.arc(origo, origo, radius, 0, 2 * Math.PI);
@@ -245,10 +257,13 @@ function updateImage(locations, stats) {
     document.getElementById("tickedPerSecond").innerHTML = stats.animalsTickedPerSecond;
 
     document.getElementById("batchNumber").innerHTML = stats.batchNumber;
-    document.getElementById("batchSendTime").innerHTML = stats.batchSendTime;
     document.getElementById("batchStart").innerHTML = stats.batchStartingLocation;
     document.getElementById("batchTransportTime").innerHTML = stats.batchReceptionTime - stats.batchSendTime;
     document.getElementById("batchProcessingDuration").innerHTML = stats.batchProcessedTime - stats.batchReceptionTime;
+    document.getElementById("batchSize").innerHTML = stats.batchSize;
+    document.getElementById("transferSpeed").innerHTML = stats.batchSize / (stats.batchReceptionTime - stats.batchSendTime);
+    document.getElementById("averageAnimalSize").innerHTML = stats.batchSize / stats.batchAnimalsProcessed;
     document.getElementById("batchAnimalsProcessed").innerHTML = stats.batchAnimalsProcessed;
     document.getElementById("batchTotalActions").innerHTML = stats.batchTotalActions;
+    document.getElementById("imageUpdateTime").innerHTML = Date.now() - stats.imageUpdateTimeStart;
 }
