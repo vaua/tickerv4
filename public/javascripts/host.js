@@ -221,7 +221,7 @@ function updateImage(locations, stats) {
             
             if (animal.genome.type > 1) {
                 if (b < origo) b += 1;
-                ctx.fillStyle = "#FF0000";
+                ctx.fillStyle = "rgb(255, " + (animal.genome.type  * 32) + " , " + (animal.genome.shape * 32) + ")";
                 var angle = Math.PI * animal.location * 2 / locations.length;
                 var x = origo + Math.cos(angle) * (radius + b);
                 var y = origo + Math.sin(angle) * (radius + b);
@@ -229,7 +229,8 @@ function updateImage(locations, stats) {
             }
             else {
                 o += 1;
-                ctx.fillStyle = "#00FFFF";
+                if (o > radius) o = radius;
+                ctx.fillStyle = "rgb(0, " + (animal.genome.type  * 32) + " , " + (animal.genome.shape * 32) + ")";
                 var angle = Math.PI * animal.location * 2 / locations.length;
                 var x = origo + Math.cos(angle) * (radius - o);
                 var y = origo + Math.sin(angle) * (radius - o);
