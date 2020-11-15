@@ -106,7 +106,7 @@ function runAnimals(batchData) {
     // parse through all animals, add 1
     var parsingStart = Date.now();
     var nonNullLocations = locations.filter( el => { return el !== null });
-    console.log("Parsing took " + Date.now() - parsingStart); 
+    //console.log("Parsing took " + Date.now() - parsingStart); 
     
     var currentMoment = Date.now();
     nonNullLocations.forEach(location => {
@@ -204,6 +204,9 @@ function updateImage(locations, stats) {
 
     stats.imageUpdateTimeStart = Date.now();
 
+    if (stats.batchStartingLocation == 0) {
+        ctx.clearRect(0, 0, 700, 700);
+    }
     ctx.beginPath();
     ctx.arc(origo, origo, radius, 0, 2 * Math.PI);
     ctx.stroke();
@@ -220,21 +223,21 @@ function updateImage(locations, stats) {
             // 2pi / max * location = angle
             
             if (animal.genome.type > 1) {
-                if (b < origo) b += 1;
+                b += 1;
                 ctx.fillStyle = "rgb(255, " + (animal.genome.type  * 32) + " , " + (animal.genome.shape * 32) + ")";
-                var angle = Math.PI * animal.location * 2 / locations.length;
+                var angle = Math.PI * animal.location * 2 / stats.worldSize;
                 var x = origo + Math.cos(angle) * (radius + b);
                 var y = origo + Math.sin(angle) * (radius + b);
-                ctx.fillRect( x, y, 2, 2 );
+                ctx.fillRect( x, y, 1, 1 );
             }
             else {
                 o += 1;
                 if (o > radius) o = radius;
                 ctx.fillStyle = "rgb(0, " + (animal.genome.type  * 32) + " , " + (animal.genome.shape * 32) + ")";
-                var angle = Math.PI * animal.location * 2 / locations.length;
+                var angle = Math.PI * animal.location * 2 / stats.worldSize;
                 var x = origo + Math.cos(angle) * (radius - o);
                 var y = origo + Math.sin(angle) * (radius - o);
-                ctx.fillRect( x, y, 2, 2 );
+                ctx.fillRect( x, y, 1, 1 );
             }
             
         })

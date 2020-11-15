@@ -135,6 +135,83 @@ Mutations and fully random animals provide new genes for the world, in its const
 
 It is important to note here that there is almost no programin involved here, and nothing tells animals what to do. They do not "know" that eating is good for them, they will get a signal that their energy level has changes, but there is nothing saying how to interpret this. They have no idea what type of animal they are (herbivore or carnivore) they don't understand what moving means... and so on. Animals are fully mechanic, with its genes and trigger/action pairs (tracts) telling them what to do in each situation (and these are either random or inherited).
 
+##### What exaxtly affects energy #####
+###### Initial energy ######
+There are two ways of being born, either by random event (random DNA creation), or by being born by a parent. Being born by random event should be quite rare (mostly in the beginning of the simulation, to populate the world, and then once in a while to test new, wholly random DNAs). In this case, a random amount of energy is alloted to the animal, according to the: ```var init_energy = getRandomInt(energy_norm) * genome.size```.
+
+However, most animals will be born by a parent. Parent('s DNA) chooses how many copies of offspring it wishes to produce, and what amount of energy to give to them. All of the energy that is given to offspring is removed from the parent, so it becomes a delicate balansing act - how to procreate without dying, or having ofspring that dies too quickly. This is one of the balansing acts that I want to study further.
+
+###### Changes to energy levels ######
+Animals lose energy given to kids at birth, depending on number of kids and energy given to them
+If food is dead (type in the lower quadrant): Animals gain / lose energy when eating / being eaten, according to ```var energyUtilised = (animal.size * 4) - Math.abs(animal.type - presumptiveFood.type - Math.pow(2, animalTypeBits-1));```. So basically max is size * 4 (32), but then minus difference in type... ***this is unclear, I need to think this through a bit more...***
+If food is alive, then fight occurs at eating attempt. The damage is done on the defending animal, which then looses ```var damage = Math.pow(2, animalSizeBits) + animal.size - presumptiveFood.size;``` so roughly 8 (plus minus difference in sizes). ***Also strange and should be further refined***.
+
+In the end of a tick, world will also remove some energy from the animals, across the board. Alive animals (non negative energy, genome type not in first quadrant) will loose ```energyLoss * animal.genome.size;``` energy, there energyLoss is a constant.
+Dead animals will loose ```energyLoss``` amount of energy as a generic energy dissipation. Right now, energy loss is 2.
+
+
+#### Dying and dissapearing ####
+When an animal has negative energy during tick tabulation in the end of an tick, it will die. Two things happen when animal dies:
+- Animal's tracts are removed (it will not react to the surroundings any longer)
+- Animal's type is set to the first quadrant.
+
+At this point, animal turns into food, similarily to the plants. However, it will still provide energy to those who eat it (for a while). It will also keep decaying each turn per above.
+
+Once an animal or a plant reaches energy level that is lower that ```-(energyContent * animal.genome.size)``` (i.e. when all energy content is gone from it), it is fully removed from the world.
+
+
+## Technology ##
+In this section we discuss how the simulation is build and executed.
+Simulation engine is written in node.js using express. To make it possible to run large amount of animals a distributed server / clients model is used. Web brosers are used as a client tool, and HTTP is used to transmit the data between server and client.
+
+### Data model ###
+I am hopeless when it comes to programming paradigms in JavaScript, so I have been mixing object oriented and functional programming in a happy manner. Bare with this.
+
+There are following quazi-objects in the simulation:
+
+#### World ####
+
+The world holds in itself information about the current world. Its main object is a list of locations that it contant (array of arrays, as long as ```world_size```). The world also holds the statistics object ```stats``` where the statistics about the world are collected.
+
+When animals are created, they are put into one of the locations (added to the array at specific position). When animals move, they are spliced out of one array and added at another. There is one to one relationship between locations[x] array holding certain amount of animals and position x in the world.
+
+The world also defines world actions, certain things that can happen in the world. It is done through worldActions-array, which contains 4 functions that take parameters:
+- changeLocation
+- changeEnergy
+- changeAffinity
+- giveBirth
+
+The animals will produce action number and parameter values as their output, and world will then call these actions by the end of the turn.
+
+#### Animal ####
+Animal object holds information about an animal, such as its unique id, energy amount, orientation in the world (as world is 1D, you can be facing left or right), genome and its affinities.
+
+Genome is the part of the animal that contains the most "interesting" parts, as its contents define what animal is, and how it acts in the world.
+
+#### Genome ####
+Genome holds some important values, such as size, shape and type, but most importantly it holds all animal tracts, or trigger-action pairs. Tracts are groupes by senses. When the world provide an input through a certain sense, triggers connected to that sense are matched, and if sucessful, they will trigger the connected action.
+
+Number of tracts per sense are random up to max tracts of the world (but size of the animal matters as well). 
+
+Genome define senses as well.
+
+##### Senses #####
+Senses connect the world and the animal. Each sense must define three functions:
+- createTractGene - the sense need to be able to provide a meaningful gene combination for a tract when a random animal is created. 
+- createImpressionFromWorld - this is very important function. Given a snapshot of the world (in a form of number of locations around the animal) this function creates a pattern that represents how this sense percieves the world. This can then be matched against the triggers in the animals genes.
+- translateAnimalActionIntoWorldAction - each trigger is connected to an action. However, action is just a gene pattern, and it needs to be translated into something that world can apply to itself. This is what this function does. It takes animal actions as pattern of genes connected to specific sense, and transforms it into a world action with necessary parameters.
+
+In the current world, two senses are implemented, vision and internal. More senses can easily be added by implementeing the above functional interace and thus connecting animal/genome to the world.
+
+
+
+
+
+
+
+
+
+
 
 
 

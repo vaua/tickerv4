@@ -205,13 +205,18 @@ function executeUpdate() {
         world.worldActions[action[0]](action[1]);
     });
 
+    // All actions have been processed.
+
     world.stats.animalsProcessed = 0;
     world.locations.filter(location => {return location != null;}).forEach(location => {
         location.forEach(animal => {
             // Remove the cost of the energy for animals that are alive and not plants
             // Alive: energy > 0. Not plant: Type > first quarter.
-            if (animal.energy > 0 && animal.genome.type > 1) {
+            if (animal.energy >= 0 && animal.genome.type > 1) {
                 animal.energy -= energyLoss * animal.genome.size;
+            } else {
+                // General decay
+                animal.energy -= energyLoss;
             }
             if (animal.energy <= 0 && animal.genome.tracts.length > 0) {
                 // Killing the energy by removing its senses(tracts).
@@ -219,8 +224,7 @@ function executeUpdate() {
                 animal.genome.type = 0;
                 world.stats.animalsDead++;
             }
-            //if (animal.energy < -(energyContent * animal.genome.size)) {
-            if (animal.energy < 0) {
+            if (animal.energy < -(energyContent * animal.genome.size)) {
                 //Now the animal has been fully eaten, remove it from the world.
                 //console.log("Removing a dead animal from the world, from location " + animal.location + " with length " + world.locations[animal.location].length);
                 world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);

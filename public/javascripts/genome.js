@@ -10,7 +10,7 @@
     const distanceBits = 3;
     const visionActionBits = 5;
     const affinityBits = 4;
-    const maxTracts = 32;
+    const maxTracts = 64;
 
     function Genome() {
 
@@ -36,16 +36,16 @@
 
         // Create a fully random Genome
         this.tracts = [];
-        this.code = [];
+        //this.code = [];
 
         this.size = getRandomInt(8);
-        this.code.push(this.size);
+        //this.code.push(this.size);
 
         this.shape = getRandomInt(8);
-        this.code.push(this.shape);
+        //this.code.push(this.shape);
 
         this.type = getRandomInt(8);
-        this.code.push(this.type);
+        //this.code.push(this.type);
 
         this.senses = senses;
 
@@ -63,7 +63,7 @@
                 }
             }
         }
-        this.code.push(this.tracts);
+        //this.code.push(this.tracts);
 
         function getSenses() {
             return createSenses();

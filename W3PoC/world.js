@@ -4,7 +4,7 @@ var Animal = require('../public/javascripts/animal.js')
 var Genome = require('../public/javascripts/genome.js')
 
 const world_size = 5000;
-const init_animals = 5000;
+const init_animals = 15000;
 const energy_norm = 100;
 //const init_ener = 100;
 
@@ -22,6 +22,7 @@ function World() {
     this.stats.energyChanged = 0;
     this.stats.affinityChanged = 0;
     this.stats.birthsGiven = 0;
+    this.stats.worldSize = world_size;
 
     debug("Starting world.");
 
@@ -52,7 +53,7 @@ function setupWorld(world) {
         var locationDelta = params[1];
 
         console.log("Changing location for animal " + animal.id + " with delta " + locationDelta);
-        console.log("Current animal localtion is: " + animal.location + ", in world location: " + world.locations[animal.location]);
+        //console.log("Current animal localtion is: " + animal.location + ", in world location: " + world.locations[animal.location]);
 
         // Check that the animal is in the location it says it is.
         if (checkCorrectLocation(animal, world.locations)) {
