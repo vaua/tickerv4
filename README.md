@@ -164,6 +164,15 @@ Once an animal or a plant reaches energy level that is lower that ```-(energyCon
 In this section we discuss how the simulation is build and executed.
 Simulation engine is written in node.js using express. To make it possible to run large amount of animals a distributed server / clients model is used. Web brosers are used as a client tool, and HTTP is used to transmit the data between server and client.
 
+### Installation instructions ###
+So you want to run your own simulations? OK, do like this:
+
+1. Download code into a folder called "titikaka"
+2. Go into titikaka-folder ```cd titikaka```
+3. start server: ```node bin/www```
+4. Open a browser and go to page: ```http://localhost:3000/runSimulation```
+5. Enjoy!
+
 ### Data model ###
 I am hopeless when it comes to programming paradigms in JavaScript, so I have been mixing object oriented and functional programming in a happy manner. Bare with this.
 
@@ -203,6 +212,24 @@ Senses connect the world and the animal. Each sense must define three functions:
 
 In the current world, two senses are implemented, vision and internal. More senses can easily be added by implementeing the above functional interace and thus connecting animal/genome to the world.
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+## Issues and stuff to be fixed
+
+- The data structure sent between server and clients is too large at this point, due to fact that animals are too large (500bytes or more per animal). Change how animals are kept in data structure so that only necessary information is transmitted. This should alĺow down to 2 bytes per affinities and ca 2.5 bytes per average tract. So an animal with 100 tracts should be under 300 bytes. 1000 animals => 300KB. Use the fact that most of the genome is static?
+
+- The server currently overheats and shuts down when running longer sessions. Should be either run at Amazon, or I should invest (Celink) in a better, sturdier PC.
 
 
 
