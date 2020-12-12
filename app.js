@@ -201,8 +201,14 @@ function executeUpdate() {
     //console.log("filtered.");
     world.stats.actionsLastTick = doneProcessing.length;
     doneProcessing.forEach(action => {
-        //console.log("Action: " + action[0] +", " + action[1]);
-        world.worldActions[action[0]](action[1]);
+        if (action[0].length == undefined) {
+            world.worldActions[action[0]](action[1]);
+        } else {
+            // There are several actions in this actions!
+            action.forEach(act => {
+                world.worldActions[act[0]](act[1]);
+            });
+        }
     });
 
     // All actions have been processed.
