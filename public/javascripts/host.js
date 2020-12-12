@@ -84,6 +84,45 @@ function executeAndSubmitResult(batchData) {
     request.send(JSON.stringify(actions));
 }
 
+function getAnimalFromAnimalArray(animalArray) {
+    var animal = {};
+    animal.id = animalArray[0];
+    var genomeCode = animalArray[1][4];
+    var visionTractLenght = animalArray[2];
+    animal.location = animalArray[3];
+    //var orig = animalArray[4];
+
+
+    animal.affinities = [];
+    animal.affinities[0] = new Array(32).fill(0);
+    animal.affinities[1] = new Array(32).fill(0);
+    animal.genome = new Genome(genomeCode, visionTractLenght);
+
+    // Check if the calculation was correct
+    /* Right now I think it is quite ok, but saving this for later...
+    if (animal.id === orig.id) {
+        if (animal.genome.size === orig.genome.size && animal.genome.type === orig.genome.type && animal.genome.shape === orig.genome.shape) {
+            for (var s = 0; s < orig.genome.tracts.length; s++) {
+                for (var t = 0; t < orig.genome.tracts[s].length; t++) {
+                    if (orig.genome.tracts[s][t] === undefined) {
+                        console.log("Let's stop for a second");
+                    }
+                    if (animal.genome.tracts[s][t].trigger != orig.genome.tracts[s][t].trigger  || 
+                        animal.genome.tracts[s][t].action != orig.genome.tracts[s][t].action || 
+                        animal.genome.tracts[s][t].affinity != orig.genome.tracts[s][t].affinity) {
+                            console.log("Wrong tract...");
+                    }
+                }
+            }
+        } else {
+            console.log("Wrong gene...");
+        }
+    } else {
+        console.log("Wrong id...");
+    }
+    */
+    return animal;
+}
 
 // This function prepares the environment for each animal and executes it,
 // obtaining the action that animal wishes to take.
@@ -105,86 +144,92 @@ function runAnimals(batchData) {
 
     // parse through all animals, add 1
     var parsingStart = Date.now();
-    var nonNullLocations = locations.filter( el => { return el !== null });
+    //locations = locations.filter( el => { return el !== null });
     //console.log("Parsing took " + Date.now() - parsingStart); 
     
     var currentMoment = Date.now();
-    nonNullLocations.forEach(location => {
-        location.forEach(animal => {
+    // Transform batch into animal objects
+    locations = locations.map(location => location == null ? null : location.map(animal_array => getAnimalFromAnimalArray(animal_array)));
+   
+    locations.forEach(location => {
+        if (location != null) {
+            location.forEach(animal => {
 
-            //console.log("Processing of last animal took " + (Date.now() - currentMoment));
-            currentMoment = Date.now();
-            // For this animal, go through each sense, check the impressions,
-            // and for each impression, see if it triggers anything.
-            // If it triggers, check if higher than affinity before. If so,
-            // set highest chosen action.
+                //console.log("Processing of last animal took " + (Date.now() - currentMoment));
+                currentMoment = Date.now();
+                // For this animal, go through each sense, check the impressions,
+                // and for each impression, see if it triggers anything.
+                // If it triggers, check if higher than affinity before. If so,
+                // set highest chosen action.
+            
 
-            // Get the senses definition from the Genome instance (gene).
-            var senses = gene.senses;
-            var animalActions = [];
+                // Get the senses definition from the Genome instance (gene).
+                var senses = gene.getSenses();
+                var animalActions = [];
 
-            //console.log(animal.genome.tracts);
+                //console.log(animal.genome.tracts);
 
-            // Get number of senses by checking the tract first dimension
-            var numberOfSenses = animal.genome.tracts.length;
+                // Get number of senses by checking the tract first dimension
+                var numberOfSenses = animal.genome.tracts.length;
 
-            for (var sense = 0; sense < numberOfSenses; sense++) {
-                var chosenTract;
-                // get Impression from the sense, second method of the three.
-                // returns the impression number as well as id of the "object" that caused the impression.
-                var impressions = senses[sense][1]([locations, animal]);
-                // if (sense == 0 && impressions.length > 0) {
-                //     console.log("Sense is " + sense + ", seing " + impressions);
-                // }
+                for (var sense = 0; sense < numberOfSenses; sense++) {
+                    var chosenTract;
+                    // get Impression from the sense, second method of the three.
+                    // returns the impression number as well as id of the "object" that caused the impression.
+                    var impressions = senses[sense][1]([locations, animal]);
+                    // if (sense == 0 && impressions.length > 0) {
+                    //     console.log("Sense is " + sense + ", seing " + impressions);
+                    // }
 
-                // Check, for each impression, it any of the tracts is triggered.
-                for (var i = 0; i < impressions.length; i++) {
-                    var tractsOfThisSense = animal.genome.tracts[sense];
-                    
-                    for (var t = 0; t < tractsOfThisSense.length; t++) {
-                        var tract = tractsOfThisSense[t];
-                        var trigger = tract.trigger;
-                        //console.log("Checking " + impressions[i][0] + " against tract " + trigger);
+                    // Check, for each impression, it any of the tracts is triggered.
+                    for (var i = 0; i < impressions.length; i++) {
+                        var tractsOfThisSense = animal.genome.tracts[sense];
+                        
+                        for (var t = 0; t < tractsOfThisSense.length; t++) {
+                            var tract = tractsOfThisSense[t];
+                            var trigger = tract.trigger;
+                            //console.log("Checking " + impressions[i][0] + " against tract " + trigger);
 
-                        if (impressions[i][0] == trigger) {
-                            //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
-                            if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
-                                //console.log("YES YES YES => this tract is winning!");
-                                chosenTract = tract;
-                                chosenTract.objId = impressions[i][1].id;
-                                chosenTract.location = impressions[i][1].location;
+                            if (impressions[i][0] == trigger) {
+                                //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
+                                if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
+                                    //console.log("YES YES YES => this tract is winning!");
+                                    chosenTract = tract;
+                                    chosenTract.objId = impressions[i][1].id;
+                                    chosenTract.location = impressions[i][1].location;
 
+                                }
                             }
                         }
                     }
-                }
-                // We have now found a tract with highest affinity. Make a world action and add to actions.
-                if (chosenTract !== undefined) {
-                    if (chosenTract.location < startingLocation || chosenTract.location > startingLocation + locations.length)  {
-                        console.log("The location of the object is beyond us.");
+                    // We have now found a tract with highest affinity. Make a world action and add to actions.
+                    if (chosenTract !== undefined) {
+                        if (chosenTract.location < startingLocation || chosenTract.location > startingLocation + locations.length)  {
+                            console.log("The location of the object is beyond us.");
+                        }
+
+                        var index = chosenTract.location - startingLocation;
+                        if (locations[index] === undefined) {
+                            console.log("da hecka? Index is: " + index);
+                        }
+                        
+                        //TODO: Very temporarily removed to get further. Needs to be reinstated.
+                        var animalThatCausedImpressions = locations[index].filter(obj => {
+                            return obj.id === chosenTract.objId;
+                        });
+
+
+                        var chosenAction = senses[sense][2]([animal, chosenTract.action, animalThatCausedImpressions]);
+                        animalActions.push(chosenAction);
+                    } else {
+                        animalActions.push([]);
                     }
-
-                    var index = chosenTract.location - startingLocation;
-                    if (locations[index] === undefined) {
-                        console.log("da hecka? Index is: " + index);
-                    }
-                    var animalThatCausedImpressions = locations[chosenTract.location - startingLocation].filter(obj => {
-                        return obj.id === chosenTract.objId;
-                    });
-
-
-
-                    var chosenAction = senses[sense][2]([animal, chosenTract.action, animalThatCausedImpressions]);
-                    animalActions.push(chosenAction);
-                    //console.log("added action to world actions. " + actions);
-                } else {
-                    animalActions.push([]);
                 }
-            }
 
-            actions.push(animalActions);
-            stats.batchAnimalsProcessed ++;
-        });
+                actions.push(animalActions);
+                stats.batchAnimalsProcessed ++;
+            });
+        }
     });
 
     // Done with all actions.

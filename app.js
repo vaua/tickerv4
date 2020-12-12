@@ -21,13 +21,17 @@ app.use(compression());
 
 var world = 0;
 var batchNumber = 0;
-var toBeProcessed = [];
 var doneProcessing = [];
 var receivedBatches = 0;
 var startOfTick = 0;
 
+// Params for world update
+var energyLoss = 2;
+var energyContent = 5;
+
+
 // This variable controls the size of the normal batch sent to client for processing.
-var batchSize = 500;
+var batchSize = 50;
 
 // This variable is a pointer of sort that keeps track of how many animals
 // we've already sent for processing, and where the next batch shall begin.
@@ -47,14 +51,6 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static('public'));
 
-
-
-
-//app.use(logger('dev'));
-
-
-//app.use('/', index);
-//app.use('/users', users);
 
 
 app.use(function(req, res, next) {
@@ -112,19 +108,27 @@ app.get('/processBatch', function(req, res){
 
   if (sentForProcessing < world.locations.length) {
       batch = world.locations.slice(sentForProcessing, sentForProcessing + batchSize);
+      batch = batch.map(location => location.map(animal => [world.animals[animal].id, 
+                                                            world.animals[animal].getShortForm(), 
+                                                            world.animals[animal].genome.tracts[0] === undefined ? 
+                                                                0 : world.animals[animal].genome.tracts[0].length, 
+                                                            world.animals[animal].location]));
       sentForProcessing += batchSize;
       //console.log("Size of the batch:  " + JSON.stringify(batch).length + " bytes.");
       //console.log("Size of Locs: " + JSON.stringify(world.locations).length);
 
-
-      var response = {"batch" : batch, "batchNumber" : batchNumber, "startingLocation" : sentForProcessing - batchSize, "stats" : world.stats, "timeStamp" : Date.now()};
+      var response = {"batch" : batch, 
+                      "batchNumber" : batchNumber, 
+                      "startingLocation" : sentForProcessing - batchSize, 
+                      "stats" : world.stats, 
+                      "timeStamp" : Date.now()};
       res.send(response);
-      console.debug("Sent batch: " + batchNumber++);
   } else {
     res.send('"status" : 0');
     debug("No animals to process. Sent back status 0 (wait).");
   }
 });
+
 
 // This is handler for clients returning animal actions.
 // These actions need to be applied to the world.
@@ -135,26 +139,13 @@ app.post('/submitBatchProcessingResult', function(req, res) {
 
     doneProcessing.push(...actions);
     receivedBatches++;
-    //console.log("Received actions: " + actions);
-    //console.log("Currently processed " + doneProcessing.length + " out of " + world.animals.length + ".");
 
-
-    
     if (receivedBatches * batchSize >= world.locations.length) {
-        //console.log("scheduling world update execution.");
-        // TODO: This will surely need to be fixed at some point.
-        //setTimeout(executeUpdate(), 100);
-        executeUpdate();
+        setTimeout(executeUpdate, 0);
     }
 
-    //console.log("Ending the request.");
     res.end();
-    //debug("Sending back the end to response.");
 });
-
-
-
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
@@ -162,8 +153,6 @@ app.use(function(req, res, next) {
   err.status = 404;
   next(err);
 });
-
-
 
 // error handler
 app.use(function(err, req, res, next) {
@@ -187,29 +176,33 @@ app.use(function(err, req, res, next) {
 function executeUpdate() {
 
     var startOfExecution = Date.now();
-    var energyLoss = 2;
-    var energyContent = 5;
 
-    //console.log("Executing update.");
-    doneProcessing = doneProcessing.flat();
-    //console.log("flattened.");
-    doneProcessing = doneProcessing.filter(function(el) {
-        //console.log("EL: " + el);
+    // Flatten the returned actions and remove any empty arrays.
+    doneProcessing = doneProcessing.flat().filter(function(el) {
         return (el != null && el.length > 0);
     });
 
-    //console.log("filtered.");
     world.stats.actionsLastTick = doneProcessing.length;
+
+    // For each returned action, execute the action with it ([0]) using given parameters ([1])
     doneProcessing.forEach(action => {
-        //console.log("Action: " + action[0] +", " + action[1]);
-        world.worldActions[action[0]](action[1]);
+        if (action[0].length != undefined) {
+            action.forEach(act => {
+                world.worldActions[act[0]](act[1]);    
+            });
+        } else {
+            world.worldActions[action[0]](action[1]);
+        }
     });
 
-    // All actions have been processed.
-
+    // All actions have been executed, now do some housekeeping
+    // For each animal in the world
     world.stats.animalsProcessed = 0;
     world.locations.filter(location => {return location != null;}).forEach(location => {
-        location.forEach(animal => {
+        location.forEach(animal_id => {
+
+            var animal = world.animals[animal_id];
+            
             // Remove the cost of the energy for animals that are alive and not plants
             // Alive: energy > 0. Not plant: Type > first quarter.
             if (animal.energy >= 0 && animal.genome.type > 1) {
@@ -218,35 +211,40 @@ function executeUpdate() {
                 // General decay
                 animal.energy -= energyLoss;
             }
+
+            // Check if animal is dead, kill it if so
             if (animal.energy <= 0 && animal.genome.tracts.length > 0) {
                 // Killing the energy by removing its senses(tracts).
                 animal.genome.tracts = [];
+                animal.genome.code = [animal.genome.code[0]];
                 animal.genome.type = 0;
                 world.stats.animalsDead++;
             }
+
+            // Check if the corpse is gone, remove if from the world
             if (animal.energy < -(energyContent * animal.genome.size)) {
                 //Now the animal has been fully eaten, remove it from the world.
                 //console.log("Removing a dead animal from the world, from location " + animal.location + " with length " + world.locations[animal.location].length);
-                world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);
+                world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal.id), 1);
                 world.stats.animalsRemoved++;
             }
+
+
             world.stats.animalsProcessed++;
         });
     });
 
     // House keeping with the variables
-
-    toBeProcessed = [];
     doneProcessing = [];
     sentForProcessing = 0;
     receivedBatches = 0;
     world.cycle += 1;
-    //console.log("Time for a new cycle " + world.cycle + ", now with " + world.stats.animalsCreated + " animals.");
+
     world.stats.tickNr++;
     world.stats.tickDuration = Date.now() - startOfTick;
     world.stats.executionDuration = Date.now() - startOfExecution;
     world.stats.animalsTickedPerSecond = (world.stats.animalsProcessed * 1000) / world.stats.tickDuration;
-    //console.log("Animal 1 status: " + world.animals[0].energy);
+
     startOfTick = 0;
 }
 

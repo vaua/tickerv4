@@ -4,15 +4,40 @@
 (function(exports) {
 
     // Consts used in triggers
+    const maxTracts = 32;
+
     const animalSizeBits = 3;
     const animalTypeBits = 3;
     const animalShapeBits = 3;
+    const sizeSpace = Math.pow(2, animalSizeBits);
+    const shapeSpace = Math.pow(2, animalShapeBits);
+    const typeSpace = Math.pow(2, animalTypeBits);
+    
     const distanceBits = 3;
+    const distanceSpace = Math.pow(2, distanceBits);
+    const visibility = distanceSpace;
+    
     const visionActionBits = 5;
-    const affinityBits = 4;
-    const maxTracts = 64;
+    const affinityBits = 3;
+    const visionTriggerSpace = Math.pow(2, (animalSizeBits + animalTypeBits + animalShapeBits + distanceBits));
+    const visionActionSpace = Math.pow(2, visionActionBits);
+    const visionAffinitySpace = Math.pow(2, affinityBits);
 
-    function Genome() {
+    const animalEnergyBits = 2;
+    const animalEnergyDeltaBits = 2;
+    const internalActionBits = 8;
+    const internalTriggerSpace = Math.pow(2, (animalEnergyBits + animalEnergyDeltaBits));
+    const internalActionSpace = Math.pow(2, internalActionBits);
+    const internalAffinitySpace = visionAffinitySpace;
+
+
+    const sizeMultiplier = Math.pow(2, (animalTypeBits + animalShapeBits + distanceBits));
+    const shapeMultiplier = Math.pow(2, (animalShapeBits + distanceBits));
+    const typeMultiplier = Math.pow(2, distanceBits);
+
+    var senses = createSenses();
+
+    function Genome(code, visionTractLength) {
 
         // Create a random Genome
         // Each creature has three main attributes: size, shape and type.
@@ -28,45 +53,70 @@
         // and if match is successful, then corresponding action is executed.
         // This is the main motor of the simulation.
 
-        var senses = [];
+        // var senses = [];
 
-        if (senses.length == 0) {
-            senses = createSenses();
-        }
+        // if (senses.length == 0) {
+        //     senses = createSenses();
+        // }
 
-        // Create a fully random Genome
-        this.tracts = [];
-        //this.code = [];
+        if (code === undefined) {
 
-        this.size = getRandomInt(8);
-        //this.code.push(this.size);
+            this.code = [];
 
-        this.shape = getRandomInt(8);
-        //this.code.push(this.shape);
+            // Create a fully random Genome
+            this.tracts = [];
+            //this.code = [];
 
-        this.type = getRandomInt(8);
-        //this.code.push(this.type);
+            this.size = getRandomInt(sizeSpace);
+            this.code[0] = this.size;
 
-        this.senses = senses;
+            this.shape = getRandomInt(shapeSpace);
+            this.code[0] += this.shape * sizeSpace;
 
-        // If genome type == 0 or 1, then it is a plant. No senses should be given.
-        if (this.type > 1) {
-            for (var s = 0; s < senses.length; s++)  {
-                this.tracts[s] = [];
-                ///console.log("There are " + senses.length + " senses in the genome.");
-                var numberOfTracts = getRandomInt(maxTracts);
-                for (var i = 0; i < numberOfTracts; i++) {
-                    //console.log("Sense is: " + senses[s][0]);
-                    var tract = senses[s][0]();
-                    this.tracts[s][i] = tract;
-                    //console.log("Added a tract " + tract + " to genome.");
+            this.type = getRandomInt(typeSpace);
+            this.code[0] += this.type * sizeSpace * shapeSpace;
+
+            // If genome type == 0 or 1, then it is a plant. No senses should be given.
+            if (this.type > 1) {
+                for (var s = 0; s < senses.length; s++)  {
+                    this.tracts[s] = [];
+                    ///console.log("There are " + senses.length + " senses in the genome.");
+                    var numberOfTracts = getRandomInt(maxTracts);
+                    for (var i = 0; i < numberOfTracts; i++) {
+                        //console.log("Sense is: " + senses[s][0]);
+                        var tract = senses[s][0]();
+                        this.tracts[s][i] = tract;
+                        this.code[1 + i + (s * this.tracts[0].length)] = tract.code;
+                        //console.log("Added a tract " + tract + " to genome.");
+                    }
                 }
             }
-        }
-        //this.code.push(this.tracts);
+            //this.code.push(this.tracts);
+        } else {
+            // there is a code - let's construct the gene from it!
+            this.code = code;
+            this.size = code[0] % sizeSpace;
 
-        function getSenses() {
-            return createSenses();
+            this.shape = Math.floor((code[0] % (sizeSpace * shapeSpace)) / sizeSpace);
+            this.type = Math.floor((code[0] % (sizeSpace * shapeSpace * typeSpace)) / (sizeSpace * shapeSpace));
+
+            this.tracts = [];
+            
+            this.tracts[0] = [];
+            this.tracts[1] = [];
+            for (var s = 0; s < code.length - 1; s++) {
+                var tractCode = code[s + 1];
+                if (s < visionTractLength) {
+                    this.tracts[0][s] = senses[0][3](tractCode);
+                } else {
+                    this.tracts[1][s - visionTractLength] = senses[1][3](tractCode);
+                }
+            }
+
+        }
+
+        Genome.prototype.getSenses = function() {
+            return senses;
         }
     }
 
@@ -84,11 +134,6 @@
         var vision = [];
         var internal = [];
 
-
-
-        const visibility = Math.pow(2, distanceBits);
-
-
         // Expecing genome: (none right now, but eventually they can be sent in instead of stated below.)
         var createVisionTractGene = function (params) {
 
@@ -99,17 +144,33 @@
             // Trigger for vision shall consist of four parts: size, shape, type and distance (for now)
             // Lets assume 8 bits for each? But, it means it will be extremely difficult to match, so no good.
             // Must be less, in order to match.
-
-            tract.trigger = getRandomInt(Math.pow(2, (animalSizeBits + animalTypeBits + animalShapeBits + distanceBits)));
+            
+            tract.trigger = getRandomInt(visionTriggerSpace);
+            tract.code = tract.trigger;
 
             // Visual sense can lead to two actions, move or eat/attach. Move requires also parameter (forward / backward, and how much)
             // All this fits in range of 32 (2 pow 5). The function that will be translating the action to world action will know how to interpret:
             // 0-15: move, 0 most back, 15 most forward. 16-31: eat.
-            tract.action = getRandomInt(Math.pow(2, visionActionBits));
+            tract.action = getRandomInt(visionActionSpace);
+            tract.code += tract.action * visionTriggerSpace;
 
             // Denotes the affinity animal has for this action. This can be changed during the animals life.
-            tract.affinity = getRandomInt(Math.pow(2, affinityBits));
+            tract.affinity = getRandomInt(visionAffinitySpace);
+            tract.code += tract.affinity * visionTriggerSpace * visionActionSpace;
 
+            return tract;
+        }
+
+        // get tractFromTractCode, when recreating genome from code
+        var getVisionTractFromCode = function (params) {
+    
+            var tract = {}
+            var code = params;
+
+            tract.trigger = code % visionTriggerSpace;
+            tract.action = Math.floor(code / visionTriggerSpace) % visionActionSpace;
+            tract.affinity = Math.floor(code / (visionTriggerSpace * visionActionSpace));
+            
             return tract;
         }
 
@@ -147,6 +208,7 @@
             }
             //console.log("Currently seing: " + visible_objects);
 
+            // For each object I as animal can see, check if it hits any triggers
             visible_objects.forEach(obj => {
 
                 if (obj.genome !== undefined) {
@@ -156,9 +218,9 @@
                         }
 
                         // calculate the impression number of object.
-                        var sizeComp = obj.genome.size * Math.pow(2, (animalTypeBits + animalShapeBits + distanceBits));
-                        var shapeComp = obj.genome.shape * Math.pow(2, (animalShapeBits + distanceBits));
-                        var typeComp = obj.genome.type * Math.pow(2, distanceBits);
+                        var sizeComp = obj.genome.size * sizeMultiplier;
+                        var shapeComp = obj.genome.shape * shapeMultiplier;
+                        var typeComp = obj.genome.type * typeMultiplier;
                         var distanceComp = Math.abs(obj.location - animal.location);
                         var impressionNumber =  sizeComp + shapeComp + typeComp + distanceComp;
 
@@ -202,7 +264,7 @@
                 //var newLocation = animal.location + distance;
 
                 // Returning world action 0 (move) and three parameters.
-                return [0, [animal, distance]];
+                return [0, [animal.id, distance]];
             } else {
 
                 // The animal is attempting to eat. There should be one more parameter.
@@ -211,7 +273,7 @@
                     return;
                 }
 
-                var presumptiveFood = params[2];
+                var presumptiveFood = params[2][0];
 
                 // Identify the food.
 
@@ -246,14 +308,14 @@
 
 
                 // Check if the food is alive
-                if (presumptiveFood.type < Math.pow(2, animalTypeBits-1)) {
+                if (presumptiveFood.genome.type < Math.pow(2, animalTypeBits-1)) {
                     // Dead animal or food, to be consumed
-                    var energyUtilised = (animal.size * 4) - Math.abs(animal.type - presumptiveFood.type - Math.pow(2, animalTypeBits-1));
+                    var energyUtilised = (animal.genome.size * 4) - Math.abs(animal.genome.type - presumptiveFood.genome.type - Math.pow(2, animalTypeBits-1));
 
                     // Question - should energy be adjusted different depending on the size of the animal? Probably!
 
                     // return world action that will add energy to animal and remove it from energyUtilised
-                    return [[1, [animal, energyUtilised]], [1, [presumptiveFood, -energyUtilised]]];
+                    return [[1, [animal.id, energyUtilised]], [1, [presumptiveFood.id, -energyUtilised]]];
                 } else {
                     // Animal alive, we are fighting!
                     // The damage made by the attacking animal will be dependant on the
@@ -263,8 +325,8 @@
 
 
                     // This is ok for now, will add energy impact later.
-                    var damage = Math.pow(2, animalSizeBits) + animal.size - presumptiveFood.size;
-                    return [1, [presumptiveFood, -damage]];
+                    var damage = Math.pow(2, animalSizeBits) + animal.genome.size - presumptiveFood.genome.size;
+                    return [1, [presumptiveFood.id, -damage]];
                 }
             }
         }
@@ -274,16 +336,15 @@
 
 
 
+
+
         // Must all sense functions take same params? Most likely no.
         // How mamy action bits?
 
-        const animalEnergyBits = 2;
-        const animalEnergyDeltaBits = 2;
         // vilken actions, viken tract, vilken förändring, hur många barn, hur mycket energy till barnen.
         // Förslag: 8 bitar (0-255)
         // 0-127: affinityAdjustment. Upp till 32 tracts. 0-31: strongly lower. 32-63: little lower. 64-95: little more. 96-127: much more!
         // 128-256: give birth. 2 bitar - hur mycket energy, 5 bitar hur mycket barn (max 15 då). 128-159: 15% energi. 160-191: 30% energi. 192-223: 45% energi 224-255: 60%.
-        const internalActionBits = 8;
 
         var createInternalTractGene = function (params) {
 
@@ -295,18 +356,35 @@
             // Trigger for vision shall consist of two parts: Internal energy and energyDelta during the last cycle.
             // Lets assume 2 bits for each? Energy: very low, low, good, high. Delta: very negative, negative, positive, very positive.
             // Zero is positive :)
-
-            tract.trigger = getRandomInt(Math.pow(2, (animalEnergyBits + animalEnergyDeltaBits)));
+            
+            tract.trigger = getRandomInt(internalTriggerSpace);
+            tract.code = tract.trigger;
 
             // Internal sense can lead to two actions: adjust action affinity and give birth. Adjust action will give argument what action,
             // how much (little or much) and what direction. Give birth takes one argument - how many kids.
-            tract.action = getRandomInt(Math.pow(2, internalActionBits));
+            tract.action = getRandomInt(internalActionSpace);
+            tract.code += tract.action * internalTriggerSpace;
 
             // Denotes the affinity animal has for this action. This can be changed during the animals life.
-            tract.affinity = getRandomInt(Math.pow(2, affinityBits));
+            tract.affinity = getRandomInt(internalAffinitySpace);
+            tract.code += tract.affinity * internalTriggerSpace * internalActionSpace;
 
             return tract;
         }
+
+        // get tractFromTractCode, when recreating genome from code
+        var getInternalTractFromCode = function (params) {
+
+            var tract = {}
+            var code = params;
+
+            tract.trigger = code % internalTriggerSpace;
+            tract.action = Math.floor(code / internalTriggerSpace) % internalActionSpace;
+            tract.affinity = Math.floor(code / (internalTriggerSpace * internalActionSpace));
+            
+            return tract;
+        }
+        
 
 
         // and now internal sense? should be easier then vision :)
@@ -319,7 +397,7 @@
                 return;
             }
 
-            animal = params[1];
+            var animal = params[1];
 
             var impressions = [];
             var energyStatus;
@@ -362,7 +440,7 @@
             var animal = params[0];
             var action = params[1];
 
-            if (action < Math.pow(2, (internalActionBits - 1)) + 120) {
+            if (action < Math.pow(2, (internalActionBits - 1)) + 80) {
                 // The action is to adjust affinity
 
                 var tractToAdjust = action % 32;
@@ -372,7 +450,7 @@
                 // calculate amount -3, -1, 1, 3.
                 var adjustment = Math.floor(action / 32) * 2 - 3;
 
-                return [2, [animal, senseToAdjust, tractInSenseToAdjust, adjustment]];
+                return [2, [animal.id, senseToAdjust, tractInSenseToAdjust, adjustment]];
             } else {
                 // the action is to give birth!
 
@@ -382,7 +460,7 @@
 
                 var numberOfKids = Math.ceil(action / 32);
                 var energyAmount = (action % 4) + 1;
-                return [3, [animal, numberOfKids, energyAmount]];
+                return [3, [animal.id, numberOfKids, energyAmount]];
             }
         }
 
@@ -391,17 +469,12 @@
         // 0 - create sense tract gene
         // 1 - express world into animal's rhealm
         // 2 - express animal's action into world's rhealm
-        vision.push(createVisionTractGene, createVisionImpressionsFromWorld, translateVisionActionToWorldAction);
-        internal.push(createInternalTractGene, createInternalImpressionsFromWorld, translateInternalActionToWorldAction);
-
-        //console.log("Vision sense: " + vision);
-        //console.log("Internal sense: " + internal);
+        // 3 - getTractFromCode
+        vision.push(createVisionTractGene, createVisionImpressionsFromWorld, translateVisionActionToWorldAction, getVisionTractFromCode);
+        internal.push(createInternalTractGene, createInternalImpressionsFromWorld, translateInternalActionToWorldAction, getInternalTractFromCode);
 
         s.push(vision, internal);
-        // TODO: temporary changed to include only vision!
-        //s.push(vision);
 
-        //console.log("Created senses, vision and internal.: " + senses[0]);
         return s;
     }
 

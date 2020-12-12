@@ -3,15 +3,14 @@ var debug = require('debug')('world');
 var Animal = require('../public/javascripts/animal.js')
 var Genome = require('../public/javascripts/genome.js')
 
-const world_size = 5000;
+const world_size = 500;
 const init_animals = 15000;
 const energy_norm = 100;
-//const init_ener = 100;
-
 
 function World() {
     this.cycle = 0;
     this.locations = [];
+    this.animals = [];
     this.worldActions = [];
     this.stats = {};
     this.stats.tickNr = 0;
@@ -24,9 +23,7 @@ function World() {
     this.stats.birthsGiven = 0;
     this.stats.worldSize = world_size;
 
-    debug("Starting world.");
-
-    // Setup world
+    // Setup world (create actions)
     setupWorld(this);
 
     // create Initial creatures
@@ -47,26 +44,21 @@ function setupWorld(world) {
             return;
         }
 
-
         // Assign the args
-        var animal = params[0];
+        var animal = world.animals[params[0]];
         var locationDelta = params[1];
 
-        console.log("Changing location for animal " + animal.id + " with delta " + locationDelta);
-        //console.log("Current animal localtion is: " + animal.location + ", in world location: " + world.locations[animal.location]);
+        //console.log("Changing location for animal " + animal.id + " with delta " + locationDelta);
 
         // Check that the animal is in the location it says it is.
         if (checkCorrectLocation(animal, world.locations)) {
             var newLocation = (animal.location + locationDelta) % world_size;
+            if (newLocation < 0) newLocation += world_size;
             
-            // Update the location, and the animal location.
-            // First, remove the animal from the location it is in.
-            world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);
-            
-            // Then, add it to the new location.
+            // Remove animal from old location and add it to the new one
+            world.removeFromLocation(animal);
             world.addToLocation(newLocation, animal);
 
-            console.log("New location is: " + animal.location);
             world.stats.locationChanged++;
         } else {
             console.log("Something is corrupted, the location of the animal is wrong.");
@@ -79,7 +71,7 @@ function setupWorld(world) {
             return;
         }
 
-        var animal = params[0];
+        var animal = world.animals[params[0]];
         var energyDelta = params[1];
         debug("Changing energy " + energyDelta + " for animal " + animal.id);
 
@@ -93,7 +85,7 @@ function setupWorld(world) {
             return;
         }
 
-        var animal = params[0];
+        var animal = world.animals[params[0]];
         var sense = params[1];
         var tract = params[2];
         var delta = params[3];
@@ -114,7 +106,7 @@ function setupWorld(world) {
 
         // At this point, we are just duplicating. Mutations will be added Later
         //var world = params[0];
-        var animal = params[0];
+        var animal = world.animals[params[0]];
         var numberOfKids = params[1];
         var energyPercentage = params[2];
 
@@ -127,6 +119,7 @@ function setupWorld(world) {
 
         for (i = 0; i < numberOfKids; i++) {
             var child = new Animal(world.stats.animalsCreated, energyPerKid, animal.genome, animal.orientation);
+            world.animals[child.id] = child;
             world.stats.animalsCreated += 1;
             world.addToLocation(animal.location, child);
         }
@@ -154,13 +147,26 @@ World.prototype.createNewRandomAnimal = function () {
     var genome = new Genome();
     var init_energy = getRandomInt(energy_norm) * genome.size
     animal = new Animal(this.stats.animalsCreated++, init_energy, genome, this.stats.animalsCreated % 2);
+    this.animals[animal.id] = animal;
     this.addToLocation(getRandomLocation(), animal);
 
 }
 
+World.prototype.removeFromLocation = function (animal) {
+    // Find animals location
+    location = world.locations[animal.location];
+    position = location.indexOf(animal.id);
+
+    if (position != -1) {
+        location.splice(location.indexOf(animal.id), 1);
+    } else {
+        console.error("Could not find animal in the position where it should have been.");
+    }
+}
+
 World.prototype.addToLocation = function (location, animal) {
     if (this.locations[location] != null) {
-        if (animal in this.locations[location]) {
+        if (animal.id in this.locations[location]) {
             console.log("Animal already in this location!");
             //Check also if correct on animal
             if (animal.location != location) {
@@ -169,13 +175,13 @@ World.prototype.addToLocation = function (location, animal) {
             }
             return;
         } else {
-            this.locations[location].push(animal);
+            this.locations[location].push(animal.id);
             animal.location = location;
         }
     } else {
         // Nothing yet in the location, will need to create interval
         this.locations[location] = [];
-        this.locations[location].push(animal);
+        this.locations[location].push(animal.id);
         animal.location = location;
         console.log("Created a new location " + location + " array and added an animal " + animal.id);
     }
