@@ -211,7 +211,7 @@
                     return;
                 }
 
-                var presumptiveFood = params[2];
+                var presumptiveFood = params[2][0];
 
                 // Identify the food.
 
@@ -246,9 +246,9 @@
 
 
                 // Check if the food is alive
-                if (presumptiveFood.type < Math.pow(2, animalTypeBits-1)) {
+                if (presumptiveFood.genome.type < Math.pow(2, animalTypeBits-1)) {
                     // Dead animal or food, to be consumed
-                    var energyUtilised = (animal.size * 4) - Math.abs(animal.type - presumptiveFood.type - Math.pow(2, animalTypeBits-1));
+                    var energyUtilised = (animal.genome.size * 4) - Math.abs(animal.genome.type - presumptiveFood.genome.type - Math.pow(2, animalTypeBits-1));
 
                     // Question - should energy be adjusted different depending on the size of the animal? Probably!
 
@@ -263,7 +263,7 @@
 
 
                     // This is ok for now, will add energy impact later.
-                    var damage = Math.pow(2, animalSizeBits) + animal.size - presumptiveFood.size;
+                    var damage = Math.pow(2, animalSizeBits) + animal.genome.size - presumptiveFood.genome.size;
                     return [1, [presumptiveFood, -damage]];
                 }
             }
