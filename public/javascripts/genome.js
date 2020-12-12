@@ -319,7 +319,7 @@
                 return;
             }
 
-            animal = params[1];
+            var animal = params[1];
 
             var impressions = [];
             var energyStatus;

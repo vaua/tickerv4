@@ -1,3 +1,5 @@
+"use strict";
+
 (function() {
 
     function Animal(id, initialEnergy, genome, orientation) {
@@ -20,7 +22,7 @@
         console.log("Returning animal!");
         module.exports = Animal;
     } else {
-        this['animal']={};
+        //this['animal']={};
         window.Animal = Animal;
     }
 }) ();

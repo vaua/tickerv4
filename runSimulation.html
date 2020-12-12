@@ -2,12 +2,13 @@
 <html>
 
 <head>
+    <script src="javascripts/world.js"></script>
     <script src="javascripts/animal.js"></script>
     <script src="javascripts/genome.js"></script>
     <script src="javascripts/host.js"></script>
 </head>
 <link rel = "stylesheet" href="stylesheets/style.css">
-<body onload="processDataBatch()">
+<body onload="startWorld()">
     <div>
         <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
         <div class="stats">World Statistics
@@ -19,6 +20,10 @@
                 <tr>
                     <td>World Tick</td>
                     <td id="tickNr"></td>
+                </tr>
+                <tr>
+                    <td>Animals Alive</td>
+                    <td id="animalsAlive"></td>
                 </tr>
                 <tr>
                     <td>Animals Created</td>
@@ -70,68 +75,15 @@
                     <td>Ticks per second</td>
                     <td id="tickedPerSecond"></td>
                 </tr>
+                <tr>
+                    <td>Image update time</td>
+                    <td id="imageUpdateTime"></td>
+                </tr>
 
             </table>
            
         </div>
 
-
-        <div>Last Batch Statistics
-            <table id="batchTable">
-                <tr>
-                    <th>Item</th>
-                    <th>Value</th>
-                </tr>
-                <tr>
-                    <td>Batch number</td>
-                    <td id="batchNumber"></td>
-                </tr>
-                
-                <tr>
-                    <td>Starting location</td>
-                    <td id="batchStart"></td>
-                </tr>
-                <tr>
-                    <td>Transport time</td>
-                    <td id="batchTransportTime"></td>
-                </tr>
-
-                <tr>
-                    <td>Processing duration</td>
-                    <td id="batchProcessingDuration"></td>
-                </tr>
-
-                <tr>
-                    <td>Batch size in bytes</td>
-                    <td id="batchSize"></td>
-                </tr>
-
-                <tr>
-                    <td>Transfer speed in KB/s</td>
-                    <td id="transferSpeed"></td>
-                </tr>
-
-                <tr>
-                    <td>Average animal size in bytes</td>
-                    <td id="averageAnimalSize"></td>
-                </tr>
-
-                <tr>
-                    <td>Animals processed in batch</td>
-                    <td id="batchAnimalsProcessed"></td>
-                </tr>
-
-                <tr>
-                    <td>Total actions generated</td>
-                    <td id="batchTotalActions"></td>
-                </tr>
-
-                <tr>
-                    <td>Image update time</td>
-                    <td id="imageUpdateTime"></td>
-                </tr>
-            </table>
-           
         </div>
 
     </div>

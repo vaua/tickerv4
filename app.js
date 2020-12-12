@@ -9,7 +9,6 @@ var compression = require('compression');
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var World = require('./W3PoC/world.js');
 const { start } = require('repl');
 var debug = require('debug')('app');
 require('log-timestamp');
@@ -86,10 +85,6 @@ app.get('/', function(req, res){
 // Handler for request for client to start a simultion.
 app.get('/runSimulation', function(req, res){
     debug("Get /runSimulation");
-
-    if (world === 0) {
-        world = new World();
-    }
 
     res.sendFile(__dirname + '/runSimulation.html');
     debug("returned runSimulation.html");
