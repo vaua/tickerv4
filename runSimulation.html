@@ -8,9 +8,17 @@
     <script src="javascripts/host.js"></script>
 </head>
 <link rel = "stylesheet" href="stylesheets/style.css">
-<body onload="startWorld()">
+<body onload="startWorld();">
+
+    <button type="button" onclick="togglePauseWorld();">Start / Pause</button>
+    <button type="button" onclick="executeOneTick();">Step</button>
+    <button type="button" onclick="startWorld();">Reset</button>
+    
     <div>
         <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
+
+        <div class="status"><h3 id="status">Status: </h3></div>
+
         <div class="stats">World Statistics
             <table id="worldTable">
                 <tr>
@@ -28,6 +36,14 @@
                 <tr>
                     <td>Animals Created</td>
                     <td id="animalsCreated"></td>
+                </tr>
+                <tr>
+                    <td>Plants Created</td>
+                    <td id="plantsCreated"></td>
+                </tr>
+                <tr>
+                    <td>Total births given</td>
+                    <td id="birthsGiven"></td>
                 </tr>
                 <tr>
                     <td>Animals Dead</td>
@@ -60,10 +76,6 @@
                     <td id="affinityChanged"></td>
                 </tr>
                 <tr>
-                    <td>Total births given</td>
-                    <td id="birthsGiven"></td>
-                </tr>
-                <tr>
                     <td>Last tick duration</td>
                     <td id="tickDuration"></td>
                 </tr>
@@ -80,11 +92,19 @@
                     <td id="imageUpdateTime"></td>
                 </tr>
 
+                <tr>
+                    <td>Above</td>
+                    <td id="above"></td>
+                </tr>
+                <tr>
+                    <td>Below</td>
+                    <td id="below"></td>
+                </tr>
+
             </table>
            
         </div>
 
         </div>
-
     </div>
 </body>

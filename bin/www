@@ -5,9 +5,9 @@
  */
 
 var app = require('../app');
-var debug = require('debug')('ex2:server');
+var debug = require('debug');
 var http = require('http');
-var World = require('../sim/world.js');
+
 
 /**
  * Get port from environment and store in Express.

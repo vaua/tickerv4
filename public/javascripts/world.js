@@ -5,6 +5,7 @@
     const world_size = 5000;
     const init_animals = 15000;
     const energy_norm = 100;
+    
 
     //const init_ener = 100;
 
@@ -22,8 +23,10 @@
         this.stats.energyChanged = 0;
         this.stats.affinityChanged = 0;
         this.stats.birthsGiven = 0;
+        this.stats.plantsCreated = 0;
         this.stats.animalsAlive = 0;
         this.stats.worldSize = world_size;
+        this.running = false;
 
         console.log("Starting world.");
 
@@ -36,8 +39,71 @@
         setupWorld(this);
 
         // create Initial creatures
-        this.createInitialCreatures();
+        for (var i = 0; i < init_animals; i++) {
+            this.createNewRandomAnimal();
+        }
         console.log("World created.");
+    }
+
+
+    World.prototype.createNewRandomAnimal = function () {
+        //console.log("New random animal.");
+        var genome = new Genome();
+        var init_energy = getRandomInt(energy_norm) * (genome.size + 1);
+        var animal = new Animal(this.stats.animalsCreated++, init_energy, genome, this.stats.animalsCreated % 2);
+        if (animal.genome.type > 1) {
+            this.stats.animalsAlive++;
+        } else {
+            this.stats.plantsCreated++;
+        }
+        this.addToLocation(getRandomLocation(), animal);
+
+    }
+
+    World.prototype.addToLocation = function (location, animal) {
+        if (this.locations[location] != null) {
+            if (animal in this.locations[location]) {
+                console.log("Animal already in this location!");
+                //Check also if correct on animal
+                if (animal.location != location) {
+                    console.log("The animal has wrong locations recorded! Fixing...");
+                    animal.location = location;
+                }
+                return;
+            } else {
+                this.locations[location].push(animal);
+                animal.location = location;
+            }
+        } else {
+            // Nothing yet in the location, will need to create interval
+            this.locations[location] = [];
+            this.locations[location].push(animal);
+            animal.location = location;
+            console.log("Created a new location " + location + " array and added an animal " + animal.id);
+        }
+    }
+
+    World.prototype.remove = function (location, animal) {
+        console.log("Removing the animal.... not implemented yet!");
+    }
+
+    function getRandomInt(max) {
+        return Math.floor(Math.random() * Math.floor(max));
+    }
+
+
+    function getRandomLocation() {
+        return getRandomInt(world_size);
+    }
+
+    function checkCorrectLocation(animal, locations) {
+        for (var i = 0; i < locations[animal.location].length; i++) {
+            if (locations[animal.location][i].id = animal.id) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function setupWorld(world) {
@@ -123,9 +189,15 @@
             animal.energy -= energyGiven;
             var energyPerKid = Math.floor(energyGiven / numberOfKids);
 
+            
+
             for (var i = 0; i < numberOfKids; i++) {
                 var child = new Animal(world.stats.animalsCreated, energyPerKid, animal.genome, animal.orientation);
-                world.stats.animalsCreated += 1;
+                if (child.genome.type > 1) {
+                    world.stats.animalsCreated ++;
+                } else {
+                    world.stats.plantsCreated ++;
+                }
                 world.addToLocation(animal.location, child);
             }
 
@@ -142,67 +214,6 @@
 
     }
 
-    World.prototype.createInitialCreatures = function () {
-        for (var i = 0; i < init_animals; i++) {
-            this.createNewRandomAnimal();
-            this.stats.animalsAlive ++;
-        }
-    }
-
-    World.prototype.createNewRandomAnimal = function () {
-        //console.log("New random animal.");
-        var genome = new Genome();
-        var init_energy = getRandomInt(energy_norm) * genome.size
-        var animal = new Animal(this.stats.animalsCreated++, init_energy, genome, this.stats.animalsCreated % 2);
-        this.addToLocation(getRandomLocation(), animal);
-
-    }
-
-    World.prototype.addToLocation = function (location, animal) {
-        if (this.locations[location] != null) {
-            if (animal in this.locations[location]) {
-                console.log("Animal already in this location!");
-                //Check also if correct on animal
-                if (animal.location != location) {
-                    console.log("The animal has wrong locations recorded! Fixing...");
-                    animal.location = location;
-                }
-                return;
-            } else {
-                this.locations[location].push(animal);
-                animal.location = location;
-            }
-        } else {
-            // Nothing yet in the location, will need to create interval
-            this.locations[location] = [];
-            this.locations[location].push(animal);
-            animal.location = location;
-            console.log("Created a new location " + location + " array and added an animal " + animal.id);
-        }
-    }
-
-    World.prototype.remove = function (location, animal) {
-        console.log("Removing the animal.... not implemented yet!");
-    }
-
-    function getRandomInt(max) {
-        return Math.floor(Math.random() * Math.floor(max));
-    }
-
-
-    function getRandomLocation() {
-        return getRandomInt(world_size);
-    }
-
-    function checkCorrectLocation(animal, locations) {
-        for (var i = 0; i < locations[animal.location].length; i++) {
-            if (locations[animal.location][i].id = animal.id) {
-                return true;
-            }
-        }
-
-        return false;
-    }
 
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {
         console.log("Returning World!");
@@ -211,14 +222,38 @@
         //this['Genome']={};
         window.World = World;
     }
+
+
 }) ();
     
-function startWorld() {
-    var world = new World();
+// ======================================================================================= //
+// Other functions
+// ======================================================================================= //
 
-    executeUpdate(world, runAnimals(world));
+
+function startWorld() {
+    document.getElementById("status").innerHTML = "Status: Creating world."
+    window.world = new World();
+    document.getElementById("status").innerHTML = "Status: World created."
 }
 
+function togglePauseWorld() {
+    document.getElementById("status").innerHTML = window.world.running ? "Status: World paused." : "Status: World running.";
+    window.world.running = !window.world.running;
+
+    if (window.world.running === true) {
+        executeUpdate(window.world, runAnimals(window.world));
+    }
+}
+
+function executeOneTick() {
+    if (!window.world.running) {
+        document.getElementById("status").innerHTML = "Status: executing one step.";
+
+        executeUpdate(window.world, runAnimals(window.world));
+        document.getElementById("status").innerHTML = "Status: World paused.";
+    }
+}
 
 // This function prepares the environment for each animal and executes it,
 // obtaining the action that animal wishes to take.
@@ -315,21 +350,18 @@ function runAnimals(world) {
     return actions;
 }
 
+// Apply all the actions from animals on the world. 
 function executeUpdate(world, actions) {
 
     var startOfExecution = Date.now();
-    var energyLoss = 2;
+    var energyLoss = 1;
     var energyContent = 5;
+    var plantEnergyGain = 1;
 
-    //console.log("Executing update.");
-    actions = actions.flat();
-    //console.log("flattened.");
-    actions = actions.filter(function(el) {
-        //console.log("EL: " + el);
+    actions = actions.flat().filter(function(el) {
         return (el != null && el.length > 0);
     });
 
-    //console.log("filtered.");
     world.stats.actionsLastTick = actions.length;
     actions.forEach(action => {
         if (action[0].length == undefined) {
@@ -342,19 +374,26 @@ function executeUpdate(world, actions) {
         }
     });
 
-    // All actions have been processed.
-
+    // All actions have been applied to the world.
     world.stats.animalsProcessed = 0;
     world.locations.filter(location => {return location != null;}).forEach(location => {
         location.forEach(animal => {
             // Remove the cost of the energy for animals that are alive and not plants
             // Alive: energy > 0. Not plant: Type > first quarter.
-            if (animal.energy >= 0 && animal.genome.type > 1) {
-                animal.energy -= energyLoss * animal.genome.size;
+            if (animal.energy > 0) {
+                if (animal.genome.type > 1) {
+                    // Alive animals loose energy depending on the size.
+                    animal.energy -= energyLoss * (animal.genome.size + 1);
+                } else {
+                    // Plants gain some energy if alive.
+                    animal.energy -= plantEnergyGain;
+                }   
             } else {
-                // General decay
+                // General decay of anything dead
                 animal.energy -= energyLoss;
             }
+
+            // If an active animal gets under energy 0, kill it.
             if (animal.energy <= 0 && animal.genome.tracts.length > 0) {
                 // Killing the energy by removing its senses(tracts).
                 animal.genome.tracts = [];
@@ -362,7 +401,8 @@ function executeUpdate(world, actions) {
                 world.stats.animalsDead++;
                 world.stats.animalsAlive--;
             }
-            if (animal.energy < -(energyContent * animal.genome.size)) {
+
+            if (animal.energy <= -(energyContent * animal.genome.size)) {
                 //Now the animal has been fully eaten, remove it from the world.
                 //console.log("Removing a dead animal from the world, from location " + animal.location + " with length " + world.locations[animal.location].length);
                 world.locations[animal.location].splice(world.locations[animal.location].indexOf(animal), 1);
@@ -382,18 +422,21 @@ function executeUpdate(world, actions) {
     // Update image
     updateImage(world);
 
-    if (world.stats.animalsAlive > 0) window.setTimeout(function() {executeUpdate(world, runAnimals(world));}, 100);
+    if (world.stats.animalsAlive && world.running > 0) 
+        window.setTimeout(function() {executeUpdate(world, runAnimals(world));}, 1);
 }
 
 
 // This function paints an update based on animal locations.
 function updateImage(world) {
 
-    const radius = 80;
+    const radius = 150;
     const origo = 500;
     var stats = world.stats;
     var locations = world.locations;
     var ctx = world.ctx;
+    var above = 0;
+    var below = 0;
 
     console.log("Updating image.");
     stats.imageUpdateTimeStart = Date.now();
@@ -416,6 +459,7 @@ function updateImage(world) {
             // 2pi / max * location = angle
             
             if (animal.genome.type > 1) {
+                above ++;
                 b += 2;
                 ctx.fillStyle = "rgb(255, " + (animal.genome.type  * 32) + " , " + (animal.genome.shape * 32) + ")";
                 var angle = Math.PI * animal.location * 2 / stats.worldSize;
@@ -424,6 +468,7 @@ function updateImage(world) {
                 ctx.fillRect( x, y, 1, 1 );
             }
             else {
+                below ++;
                 o += 1;
                 if (o > radius) o = radius;
                 ctx.fillStyle = "rgb(0, " + (animal.genome.type  * 32) + " , " + (animal.genome.shape * 32) + ")";
@@ -443,6 +488,7 @@ function updateImage(world) {
     document.getElementById("tickNr").innerHTML = stats.tickNr;
     document.getElementById("animalsAlive").innerHTML = stats.animalsAlive;
     document.getElementById("animalsCreated").innerHTML = stats.animalsCreated;
+    document.getElementById("plantsCreated").innerHTML = stats.plantsCreated;
     document.getElementById("animalsDead").innerHTML = stats.animalsDead;
     document.getElementById("animalsRemoved").innerHTML = stats.animalsRemoved;
     document.getElementById("actionsLastTick").innerHTML = stats.actionsLastTick;
@@ -456,4 +502,7 @@ function updateImage(world) {
     document.getElementById("tickedPerSecond").innerHTML = stats.animalsTickedPerSecond;
 
     document.getElementById("imageUpdateTime").innerHTML = Date.now() - stats.imageUpdateTimeStart;
+
+    document.getElementById("above").innerHTML = above;
+    document.getElementById("below").innerHTML = below;
 }

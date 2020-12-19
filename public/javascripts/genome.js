@@ -49,7 +49,7 @@
 
         this.senses = senses;
 
-        // If genome type == 0 or 1, then it is a plant. No senses should be given.
+        // If genome type == 0 or 1, then it is a plant. Only internal given.
         if (this.type > 1) {
             for (var s = 0; s < senses.length; s++)  {
                 this.tracts[s] = [];
@@ -62,6 +62,16 @@
                     //console.log("Added a tract " + tract + " to genome.");
                 }
             }
+        } else {
+            /*
+            // Create the plant
+            var s = 1; // Designation for internal tract
+            var numberOfTracts = getRandomInt(maxTracts / 2);
+            for (var i = 0; i < numberOfTracts; i++) {
+                var tract = senses[s][0]();
+                this.tracts[s][i] = tract;
+            }
+            */ // Will wait with this... right now.
         }
         //this.code.push(this.tracts);
 
@@ -362,7 +372,7 @@
             var animal = params[0];
             var action = params[1];
 
-            if (action < Math.pow(2, (internalActionBits - 1)) + 120) {
+            if (action < Math.pow(2, (internalActionBits - 1)) + 70) {
                 // The action is to adjust affinity
 
                 var tractToAdjust = action % 32;
