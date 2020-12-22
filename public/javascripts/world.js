@@ -267,6 +267,8 @@ function executeOneTick() {
     }
 }
 
+
+
 // This function prepares the environment for each being and executes it,
 // obtaining the action that being wishes to take.
 function presentWorldAndGetActions(world) {
@@ -307,9 +309,6 @@ function presentWorldAndGetActions(world) {
                     // get Impression from the sense, second method of the three.
                     // returns the impression number as well as id of the "object" that caused the impression.
                     var impressions = senses[sense][1]([locations, being]);
-                    // if (sense == 0 && impressions.length > 0) {
-                    //     console.log("Sense is " + sense + ", seing " + impressions);
-                    // }
 
                     // Check, for each impression, it any of the tracts is triggered.
                     for (var i = 0; i < impressions.length; i++) {
@@ -395,7 +394,8 @@ function tickWorld(world, actions) {
     world.stats.averageAnimalAge = 0;
     world.stats.averageDeadAnimalAge = 0;
     world.stats.animalsDeadThisTick = 0;
-    world.stats.oldestLivingAnimal = 0;
+    world.stats.lla = {};
+    world.stats.lla.age = 0;
 
     world.locations.filter(location => {return location != null;}).forEach(location => {
         location.forEach(being => {
@@ -420,7 +420,7 @@ function tickWorld(world, actions) {
             if (being.isAnimal() && !being.isDead()) {
                 world.stats.averageAnimalAge += being.age;
                 world.stats.animalsProcessed ++;
-                if (being.age > world.stats.oldestLivingAnimal) {
+                if (being.age > world.stats.lla.age) {
                     world.stats.lla = being;
                 }
             }
