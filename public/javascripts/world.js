@@ -5,10 +5,6 @@
     const world_size = 500;
     const energy_norm = 1000;
     
-
-    //const init_ener = 100;
-
-
     function World() {
         this.cycle = 0;
         this.locations = [];
@@ -28,6 +24,7 @@
         this.stats.animalsAlive = 0;
         this.stats.plantsAlive = 0;
         this.stats.worldSize = world_size;
+        this.stats.animalTypeMonitored = "age";
         this.running = false;
 
         this.target_beings = 1550;
@@ -131,7 +128,7 @@
             var being = params[0];
             var locationDelta = params[1];
 
-            console.log("Changing location for animal " + being.id + " with delta " + locationDelta);
+            //console.log("Changing location for animal " + being.id + " with delta " + locationDelta);
             //console.log("Current animal localtion is: " + animal.location + ", in world location: " + world.locations[animal.location]);
 
             // Check that the animal is in the location it says it is.
@@ -145,7 +142,7 @@
                 // Then, add it to the new location.
                 world.addToLocation(newLocation, being);
 
-                console.log("New location is: " + being.location);
+                //console.log("New location is: " + being.location);
                 world.stats.locationChanged++;
             } else {
                 console.log("Something is corrupted, the location of the animal is wrong.");
@@ -200,13 +197,12 @@
             
 
             for (var i = 0; i < numberOfKids; i++) {
-                var child = new Being(world.stats.beingsCreated, energyPerKid, being.genome, being.orientation);
+                var child = new Being(world.stats.beingsCreated++, energyPerKid, being.genome, being.orientation);
+                being.kids++;
                 if (child.isAnimal()) {
-                    world.stats.beingsCreated ++;
                     world.stats.animalsCreated ++;
                     world.stats.animalsAlive ++;
                 } else {
-                    world.stats.beingsCreated ++;
                     world.stats.plantsCreated ++;
                     world.stats.plantsAlive ++;
                 }
@@ -267,6 +263,11 @@ function executeOneTick() {
     }
 }
 
+function onRadioClick(radio) {
+    window.world.stats.animalTypeMonitored = radio.value;
+    console.log("Changed to: " + radio.value);
+}
+
 
 
 // This function prepares the environment for each being and executes it,
@@ -320,7 +321,8 @@ function presentWorldAndGetActions(world) {
                             var trigger = tract.trigger;
                             //console.log("Checking " + impressions[i][0] + " against tract " + trigger);
 
-                            if (impressions[i][0] == trigger) {
+                            // Check if impression triggers the specific trigger
+                            if (checkIfImpressionTriggersTrigger(impressions[i][0], trigger, sense)) {
                                 //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
                                 if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
                                     //console.log("YES YES YES => this tract is winning!");
@@ -367,6 +369,29 @@ function presentWorldAndGetActions(world) {
     return actions;
 }
 
+function checkIfImpressionTriggersTrigger(impression, trigger, sense) {
+    if (sense == 0) {
+        if (trigger.length != 3 || impression.length != 3) {
+            console.log("Bad call MOFO!");
+        }
+
+        if (trigger[1] == 0 && trigger[2] == 0) {
+//            console.log("Matching on the first level.");
+            var result = impression[0] == trigger[0];
+            return result;
+        } else if (trigger[2] == 0) {
+            //console.log("Matching on the second level.");
+            var result = (impression[0] == trigger[0] && impression[1] == trigger[1]);
+            return result;
+        } 
+
+        var result = (impression[0] == trigger[0] && impression[1] == trigger[1] && impression[2] == trigger[2]);
+        return result;
+    } 
+
+    return impression == trigger;
+}
+
 // Apply all the actions from beings on the world. 
 function tickWorld(world, actions) {
 
@@ -394,8 +419,16 @@ function tickWorld(world, actions) {
     world.stats.averageAnimalAge = 0;
     world.stats.averageDeadAnimalAge = 0;
     world.stats.animalsDeadThisTick = 0;
-    world.stats.lla = {};
-    world.stats.lla.age = 0;
+
+    // Different animal types tracked
+    world.stats.longestLivingAnimal = {};
+    world.stats.longestLivingAnimal.age = 0;
+    world.stats.mostKidsAnimal = {};
+    world.stats.mostKidsAnimal.numberOfKids = 0;
+    world.stats.highestEnergyAnimal = {};
+    world.stats.highestEnergyAnimal.energy = 0;
+    world.stats.mostConsecutiveEnergyIncreases = {};
+    world.stats.mostConsecutiveEnergyIncreases.consecutiveEnergyIncreases = 0;
 
     world.locations.filter(location => {return location != null;}).forEach(location => {
         location.forEach(being => {
@@ -420,8 +453,18 @@ function tickWorld(world, actions) {
             if (being.isAnimal() && !being.isDead()) {
                 world.stats.averageAnimalAge += being.age;
                 world.stats.animalsProcessed ++;
-                if (being.age > world.stats.lla.age) {
-                    world.stats.lla = being;
+                if (being.age > world.stats.longestLivingAnimal.age) {
+                    world.stats.longestLivingAnimal = being;
+                }
+                if (being.numberOfKids > world.stats.mostKidsAnimal.numberOfKids) {
+                    world.stats.mostKidsAnimal = being;
+                }
+                if (being.energy > world.stats.highestEnergyAnimal.energy) {
+                    world.stats.highestEnergyAnimal = being;
+                }
+
+                if (being.consecutiveEnergyIncreases > world.stats.mostConsecutiveEnergyIncreases.consecutiveEnergyIncreases) {
+                    world.stats.mostConsecutiveEnergyIncreases = being;
                 }
             }
 
@@ -452,8 +495,6 @@ function tickWorld(world, actions) {
     world.stats.executionDuration = Date.now() - startOfExecution;
     world.stats.animalsTickedPerSecond = Math.floor((world.stats.beingsProcessed * 1000) / world.stats.tickDuration);
 
-    // To avoid division by zero... but maybe not eve
-
     // Update image
     updateImage(world);
 
@@ -466,12 +507,13 @@ function tickWorld(world, actions) {
 function updateImage(world) {
 
     const radius = 150;
-    const origo = 500;
+    const origo = 350;
     var stats = world.stats;
     var locations = world.locations;
     var ctx = world.ctx;
     var above = 0;
     var below = 0;
+    var animalMonitored = {};
 
     console.log("Updating image.");
     stats.imageUpdateTimeStart = Date.now();
@@ -482,6 +524,25 @@ function updateImage(world) {
     ctx.arc(origo, origo, radius, 0, 2 * Math.PI);
     ctx.stroke();
 
+    // pick the animal that we are looking a bit extra at
+    switch(stats.animalTypeMonitored) {
+        case "age": 
+            animalMonitored = stats.longestLivingAnimal;
+            break;
+        case "highEnergy":
+            animalMonitored = stats.highestEnergyAnimal;
+            break;
+        case "increasedEnergy":
+            animalMonitored = stats.mostConsecutiveEnergyIncreases;
+            break;
+        case "mostKids":
+            animalMonitored = stats.mostKidsAnimal;
+            break;
+        default:
+            console.log("Failed to find appropriate type of animal.");
+            break;
+    }
+
     locations.forEach(location => {
         var o = 0;
         var b = 0;
@@ -490,7 +551,7 @@ function updateImage(world) {
 
             if (being == null) return;
             // Radius r
-            // Tra  nslate location l into x, y on circle r
+            // Translate location l into x, y on circle r
             // 2pi / max * location = angle
             
             if (being.isAnimal() && !being.isDead()) {
@@ -501,6 +562,13 @@ function updateImage(world) {
                 var x = origo + Math.cos(angle) * (radius + b);
                 var y = origo + Math.sin(angle) * (radius + b);
                 ctx.fillRect( x, y, 1, 1 );
+
+                if (being.id == animalMonitored.id) {
+                    ctx.fillStyle="red";
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
             }
             else {
                 below ++;
@@ -515,6 +583,8 @@ function updateImage(world) {
             
         });
     });
+
+    
 
     ctx.stroke();
 
@@ -534,10 +604,10 @@ function updateImage(world) {
     document.getElementById("plantsCreated").innerHTML = stats.plantsCreated;
     document.getElementById("plantsAlive").innerHTML = stats.plantsAlive;
 
-    document.getElementById("averageAnimalAge").innerHTML = stats.averageAnimalAge / stats.animalsProcessed;
-    document.getElementById("averageDeadAnimalAge").innerHTML = stats.averageDeadAnimalAge / stats.animalsDeadThisTick;
+    document.getElementById("averageAnimalAge").innerHTML = Math.floor(stats.averageAnimalAge / stats.animalsProcessed);
+    document.getElementById("averageDeadAnimalAge").innerHTML = Math.floor(stats.averageDeadAnimalAge / stats.animalsDeadThisTick);
     document.getElementById("animalsDeadThisTick").innerHTML = stats.animalsDeadThisTick;
-    document.getElementById("oldestLivingAnimal").innerHTML = stats.lla.age;
+    document.getElementById("oldestLivingAnimal").innerHTML = stats.longestLivingAnimal.age;
 
     document.getElementById("actionsLastTick").innerHTML = stats.actionsLastTick;
 
@@ -546,7 +616,7 @@ function updateImage(world) {
     document.getElementById("affinityChanged").innerHTML = stats.affinityChanged;
     document.getElementById("visionImpressionsChecked").innerHTML = stats.visionImpressionsChecked;
     document.getElementById("visionTriggersGenerated").innerHTML = stats.visionTriggersGenerated;
-    document.getElementById("visionTriggeredPerAnimal").innerHTML = stats.visionTriggersGenerated / stats.animalsAlive;
+    document.getElementById("visionTriggeredPerAnimal").innerHTML = Math.floor(stats.visionTriggersGenerated / stats.animalsAlive * 100);
     
     document.getElementById("tickDuration").innerHTML = stats.tickDuration;
     document.getElementById("executionDuration").innerHTML = stats.executionDuration;
@@ -557,14 +627,14 @@ function updateImage(world) {
     document.getElementById("below").innerHTML = below;
 
     // Longest living animal stats
-    document.getElementById("llaId").innerHTML = stats.lla.id;
-    document.getElementById("llaAge").innerHTML = stats.lla.age;
-    document.getElementById("llaEnergy").innerHTML = stats.lla.energy;
-    document.getElementById("llaSize").innerHTML = stats.lla.genome.size;
-    document.getElementById("llaType").innerHTML = stats.lla.genome.type;
-    document.getElementById("llaShape").innerHTML = stats.lla.genome.shape;
-    document.getElementById("llaLastImpressions").innerHTML = stats.lla.lastImpressions;
-    document.getElementById("llaLastActions").innerHTML = stats.lla.lastActions;
+    document.getElementById("animalMonitoredId").innerHTML = animalMonitored.id;
+    document.getElementById("animalMonitoredAge").innerHTML = animalMonitored.age;
+    document.getElementById("animalMonitoredEnergy").innerHTML = animalMonitored.energy;
+    document.getElementById("animalMonitoredSize").innerHTML = animalMonitored.genome.size;
+    document.getElementById("animalMonitoredType").innerHTML = animalMonitored.genome.type;
+    document.getElementById("animalMonitoredShape").innerHTML = animalMonitored.genome.shape;
+    //document.getElementById("animalMonitoredLastImpressions").innerHTML = stats.animalMonitored.lastImpressions;
+    document.getElementById("animalMonitoredLastActions").innerHTML = animalMonitored.lastActions;
 
 
 }   

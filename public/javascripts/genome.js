@@ -12,6 +12,11 @@
     const affinityBits = 4;
     const maxTracts = 64;
 
+    const animalSizeSpace = Math.pow(2, animalSizeBits);
+    const animalTypeSpace = Math.pow(2, animalTypeBits);
+    const animalShapeSpace = Math.pow(2, animalShapeBits);
+    const distanceSpace = Math.pow(2, distanceBits);
+
     function Genome() {
 
         // Create a random Genome
@@ -38,14 +43,9 @@
         this.tracts = [];
         //this.code = [];
 
-        this.size = getRandomInt(8);
-        //this.code.push(this.size);
-
-        this.shape = getRandomInt(8);
-        //this.code.push(this.shape);
-
-        this.type = getRandomInt(8);
-        //this.code.push(this.type);
+        this.size = getRandomInt(animalSizeSpace);
+        this.shape = getRandomInt(animalTypeSpace);
+        this.type = getRandomInt(animalShapeSpace);
 
         this.senses = senses;
 
@@ -96,7 +96,7 @@
 
 
 
-        const visibility = Math.pow(2, distanceBits);
+        const visibility = distanceSpace;
 
 
         // Expecing genome: (none right now, but eventually they can be sent in instead of stated below.)
@@ -110,7 +110,23 @@
             // Lets assume 8 bits for each? But, it means it will be extremely difficult to match, so no good.
             // Must be less, in order to match.
 
-            tract.trigger = getRandomInt(Math.pow(2, (animalSizeBits + animalTypeBits + animalShapeBits + distanceBits)));
+            // Trigger shall consist  of 1-3 levels.
+            var lvls = getRandomInt(3);
+            
+            var lvl1 = getRandomInt(16);
+            var lvl2 = 0;
+            var lvl3 = 0;
+
+            if (lvls == 1) {
+                var lvl2 = getRandomInt(16);
+            }
+
+            if (lvls == 2) {
+                var lvl2 = getRandomInt(16);
+                var lvl3 = getRandomInt(16);
+            }
+            
+            tract.trigger = [lvl1, lvl2, lvl3];
 
             // Visual sense can lead to two actions, move or eat/attach. Move requires also parameter (forward / backward, and how much)
             // All this fits in range of 32 (2 pow 5). The function that will be translating the action to world action will know how to interpret:
@@ -166,13 +182,37 @@
                         }
 
                         // calculate the impression number of object.
+                        /*
                         var sizeComp = obj.genome.size * Math.pow(2, (animalTypeBits + animalShapeBits + distanceBits));
                         var shapeComp = obj.genome.shape * Math.pow(2, (animalShapeBits + distanceBits));
                         var typeComp = obj.genome.type * Math.pow(2, distanceBits);
                         var distanceComp = Math.abs(obj.location - animal.location);
                         var impressionNumber =  sizeComp + shapeComp + typeComp + distanceComp;
+                        */
 
-                        impressions.push([impressionNumber, obj]);
+                        // Alternative calculation of impression in different "granulatities"
+                        var sizeComp1 = obj.genome.size >= 4;
+                        var sizeComp2 = obj.genome.size - (sizeComp1 * 4) >= 2;
+                        var sizeComp3 = obj.genome.size - (sizeComp1 * 4) - (sizeComp2 * 2) >= 1;
+
+                        var typeComp1 = obj.genome.type >= 4;
+                        var typeComp2 = obj.genome.type - (typeComp1 * 4) >= 2;
+                        var typeComp3 = obj.genome.type - (typeComp1 * 4) - (typeComp2 * 2) >= 1;
+
+                        var shapeComp1 = obj.genome.shape >= 4;
+                        var shapeComp2 = obj.genome.shape - (shapeComp1 * 4) >= 2;
+                        var shapeComp3 = obj.genome.shape - (shapeComp1 * 4) - (shapeComp2 * 2) >= 1;
+                        
+                        var distanceComp = Math.abs(obj.location - animal.location);
+                        var distanceComp1 = distanceComp < 4;
+                        var distanceComp2 = distanceComp - (distanceComp1 * 4) < 2;
+                        var distanceComp3 = distanceComp - (distanceComp1 * 4) - (distanceComp2 * 2) < 1;
+
+                        var lvl1 = (sizeComp1 * 8) + (typeComp1 * 4) + (shapeComp1 * 2) + distanceComp1;
+                        var lvl2 = (sizeComp2 * 8) + (typeComp2 * 4) + (shapeComp2 * 2) + distanceComp2;
+                        var lvl3 = (sizeComp3 * 8) + (typeComp3 * 4) + (shapeComp3 * 2) + distanceComp3;
+
+                        impressions.push([[lvl1, lvl2, lvl3], obj]);
                     } else {
                         //console.log("Uuups, this is me :)");
                     }

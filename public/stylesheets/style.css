@@ -1,20 +1,25 @@
 body {
   padding: 50px;
-  width: 1000px;
+  width: 2800px;
   font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
 }
 
 .canv {
-  position: absolute;
-  left: 0;
+  /*position: absolute;
+  left: 0;*/
+  border:solid;
+  float:left;
+  margin: 20px;
   width: 700px;
   height: 700px;
 }
 
 .stats {
   border:solid;
-  position: absolute;
-  left: 800px;
+  float:left;
+  margin: 20px;
+  /*position: absolute;
+  left: 800px;*/
 }
 
 a {

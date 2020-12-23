@@ -17,6 +17,9 @@
         this.age = 0;
         this.lastImpressions = [];
         this.lastActions = [];
+        this.numberOfKids = 0;
+        this.consecutiveEnergyIncreases = 0;
+        this.energyLastTick = 0;
 
         for (var a = 0; a < 2; a++) {
             this.affinities[a] = [];
@@ -35,6 +38,14 @@
             // for dead beings, just ordinary decay...
             this.energy -= energyLoss;
         }
+
+        // Check if more energy than before
+        if (this.energy > this.energyLastTick) {
+            this.consecutiveEnergyIncreases++;
+        } else {
+            this.consecutiveEnergyIncreases = 0;
+        }
+        this.energyLastTick = this.energy;
     }
 
     Being.prototype.isDecomposed = function() {

@@ -13,13 +13,16 @@
     <button type="button" onclick="togglePauseWorld();">Start / Pause</button>
     <button type="button" onclick="executeOneTick();">Step</button>
     <button type="button" onclick="startWorld();">Reset</button>
-    
+    <div class="status"><h3 id="status">Status: </h3></div>
+
     <div>
+        
         <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
 
-        <div class="status"><h3 id="status">Status: </h3></div>
 
-        <div class="stats">World Statistics
+
+        <div class="stats">
+            <h3>World Statistics</h3>
             <table id="worldTable">
                 <tr>
                     <th>Item</th>
@@ -31,7 +34,7 @@
                 </tr>
 
                 <tr style="border-bottom:4px solid black">
-                    <td colspan="100%"></td>
+                    <td colspan="100%"> </td>
                 </tr>
 
                 <tr>
@@ -157,7 +160,20 @@
                 </tr>
 
             </table>
+        </div>
 
+        <div class="stats">
+            <h3>Animal to follow:</h3>
+            <input type="radio" id="age" name="animal" value="age" onclick="onRadioClick(this);" checked="checked">
+            <label for="age">Highest age</label><br>
+            <input type="radio" id="highEnergy" name="animal" onclick="onRadioClick(this);" value="highEnergy">
+            <label for="highEnergy">Highest Energy</label><br>
+            <input type="radio" id="increasedEnergy" name="animal" onclick="onRadioClick(this);" value="increasedEnergy">
+            <label for="increasedEnergy">Consecutive Energy Increase</label><br>
+            <input type="radio" id="mostKids" name="animal" onclick="onRadioClick(this);" value="mostKids">
+            <label for="mostKids">Most Kids Spawned</label><br>
+            
+            <h3>Followed Animal Statistics</h3>
             <table id="animalTable">
                 <tr>
                     <th>Item</th>
@@ -165,42 +181,43 @@
                 </tr>
                 <tr>
                     <td>Animal Id Of Animal With Age</td>
-                    <td id="llaId"></td>
+                    <td id="animalMonitoredId"></td>
                 </tr>
                 <tr>
                     <td>Animal Age</td>
-                    <td id="llaAge"></td>
+                    <td id="animalMonitoredAge"></td>
                 </tr>
                 <tr>
                     <td>Animal Energy</td>
-                    <td id="llaEnergy"></td>
+                    <td id="animalMonitoredEnergy"></td>
                 </tr>
                 <tr>
                     <td>Animal Size</td>
-                    <td id="llaSize"></td>
+                    <td id="animalMonitoredSize"></td>
                 </tr>
                 <tr>
                     <td>Animal Type</td>
-                    <td id="llaType"></td>
+                    <td id="animalMonitoredType"></td>
                 </tr>
                 <tr>
                     <td>Animal Shape</td>
-                    <td id="llaShape"></td>
+                    <td id="animalMonitoredShape"></td>
                 </tr>
 
-                <tr>
+                <!--tr>
                     <td>Last Impressions</td>
-                    <td id="llaLastImpressions"></td>
-                </tr>
+                    <td id="animalMonitoredLastImpressions"></td>
+                </tr-->
 
                 <tr>
                     <td>Last Actions</td>
-                    <td id="llaLastActions"></td>
+                    <td id="animalMonitoredLastActions"></td>
                 </tr>
 
 
             </table>
         </div>
+
 
         </div>
     </div>
