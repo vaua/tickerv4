@@ -206,7 +206,7 @@
 
             for (var i = 0; i < numberOfKids; i++) {
                 var child = new Being(world.stats.beingsCreated++, energyPerKid, being.genome, being.orientation);
-                being.kids++;
+                being.numberOfKids++;
                 if (child.isAnimal()) {
                     world.stats.animalsCreated ++;
                     world.stats.animalsAlive ++;
@@ -396,11 +396,9 @@ function checkIfImpressionTriggersTrigger(impression, trigger, sense) {
         }
 
         if (trigger[1] == 0 && trigger[2] == 0) {
-//            console.log("Matching on the first level.");
             var result = impression[0] == trigger[0];
             return result;
         } else if (trigger[2] == 0) {
-            //console.log("Matching on the second level.");
             var result = (impression[0] == trigger[0] && impression[1] == trigger[1]);
             return result;
         } 
@@ -650,6 +648,7 @@ function updateImage(world) {
     document.getElementById("animalMonitoredId").innerHTML = animalMonitored.id;
     document.getElementById("animalMonitoredAge").innerHTML = animalMonitored.age;
     document.getElementById("animalMonitoredEnergy").innerHTML = animalMonitored.energy;
+    document.getElementById("animalMonitoredKidsSpawned").innerHTML = animalMonitored.numberOfKids;
     document.getElementById("animalMonitoredSize").innerHTML = animalMonitored.genome.size;
     document.getElementById("animalMonitoredType").innerHTML = animalMonitored.genome.type;
     document.getElementById("animalMonitoredShape").innerHTML = animalMonitored.genome.shape;
