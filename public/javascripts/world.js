@@ -649,6 +649,7 @@ function updateImage(world) {
     document.getElementById("animalMonitoredAge").innerHTML = animalMonitored.age;
     document.getElementById("animalMonitoredEnergy").innerHTML = animalMonitored.energy;
     document.getElementById("animalMonitoredKidsSpawned").innerHTML = animalMonitored.numberOfKids;
+    document.getElementById("animalMonitoredConsecutiveEnergyIncreases").innerHTML = animalMonitored.consecutiveEnergyIncreases;
     document.getElementById("animalMonitoredSize").innerHTML = animalMonitored.genome.size;
     document.getElementById("animalMonitoredType").innerHTML = animalMonitored.genome.type;
     document.getElementById("animalMonitoredShape").innerHTML = animalMonitored.genome.shape;
