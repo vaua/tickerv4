@@ -67,6 +67,11 @@
 
     World.prototype.addToLocation = function (location, being) {
         if (this.locations[location] != null) {
+            for (var l = 0; l < this.locations[location].length; l++) {
+                if (this.locations[location][l].id == being.id) {
+                    console.log("There is an object with this exact ID already in the bussom.");
+                }
+            }
             if (being in this.locations[location]) {
                 console.log("Animal already in this location!");
                 //Check also if correct on animal
@@ -88,14 +93,9 @@
         }
     }
 
-    World.prototype.remove = function (location, animal) {
-        console.log("Removing the animal.... not implemented yet!");
-    }
-
     function getRandomInt(max) {
         return Math.floor(Math.random() * Math.floor(max));
     }
-
 
     function getRandomLocation() {
         return getRandomInt(world_size);
@@ -103,7 +103,7 @@
 
     function checkCorrectLocation(animal, locations) {
         for (var i = 0; i < locations[animal.location].length; i++) {
-            if (locations[animal.location][i].id = animal.id) {
+            if (locations[animal.location][i].id == animal.id) {
                 return true;
             }
         }
@@ -134,10 +134,18 @@
             // Check that the animal is in the location it says it is.
             if (checkCorrectLocation(being, world.locations)) {
                 var newLocation = (being.location + locationDelta) % world_size;
+                if (newLocation < 0) newLocation += world_size;
                 
                 // Update the location, and the animal location.
                 // First, remove the animal from the location it is in.
-                world.locations[being.location].splice(world.locations[being.location].indexOf(being), 1);
+                var beingIndex = getBeingIndex(being, world.locations[being.location]);
+                world.locations[being.location].splice(beingIndex, 1);
+
+                /*for (var l = 0; l < world.locations[being.location].length; l++) {
+                    if (world.locations[being.location][l].id == being.id) {
+                        console.log("Unqualified. Should have left already.");
+                    }
+                }*/
                 
                 // Then, add it to the new location.
                 world.addToLocation(newLocation, being);
@@ -206,6 +214,14 @@
                     world.stats.plantsCreated ++;
                     world.stats.plantsAlive ++;
                 }
+
+                
+                /*for (var l = 0; l < world.locations[being.location].length; l++) {
+                    if (world.locations[being.location][l].id == child.id) {
+                        console.log("Unqualified, maybe even worse. Should have left already.");
+                    }
+                }*/
+
                 world.addToLocation(being.location, child);
             }
 
@@ -266,6 +282,10 @@ function executeOneTick() {
 function onRadioClick(radio) {
     window.world.stats.animalTypeMonitored = radio.value;
     console.log("Changed to: " + radio.value);
+}
+
+function getBeingIndex(being, location) {
+    return location.findIndex(function(b) {return b.id == being.id});
 }
 
 
