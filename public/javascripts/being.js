@@ -16,6 +16,7 @@
         this.dead = false;
         this.age = 0;
         this.lastImpressions = [];
+        this.lastTrigger = [];
         this.lastActions = [];
         this.numberOfKids = 0;
         this.consecutiveEnergyIncreases = 0;
@@ -31,7 +32,7 @@
 
     Being.prototype.tick = function() {
         if (!this.isDead()) {
-            // for living creatures, increase energy based on size
+            // for living creatures, decrease energy based on size
             this.energy -= energyLoss * (this.genome.size + 1);
             this.age++;
         } else {
@@ -45,6 +46,12 @@
         } else {
             this.consecutiveEnergyIncreases = 0;
         }
+
+        // Chop it off to max if over max
+        if (this.energy > (2 * 200 * this.genome.size)) {
+            this.energy = 2 * 200 * this.genome.size;
+        }
+
         this.energyLastTick = this.energy;
     }
 

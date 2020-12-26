@@ -3,7 +3,7 @@
 (function (exports) {
 
     const world_size = 500;
-    const energy_norm = 1000;
+    const energy_norm = 200;
     
     function World() {
         this.cycle = 0;
@@ -301,6 +301,7 @@ function presentWorldAndGetActions(world) {
     stats.tickStartTime = Date.now();
     stats.visionTriggersGenerated = 0;
     stats.visionImpressionsChecked = 0;
+    world.stats.animalActedUpon = {};
 
     // parse through all beings, add 1
     var parsingStart = Date.now();
@@ -327,6 +328,9 @@ function presentWorldAndGetActions(world) {
 
                 for (var sense = 0; sense < numberOfSenses; sense++) {
                     var chosenTract;
+                    var affectedObjectId;
+                    var affectedObjectLocation;
+
                     // get Impression from the sense, second method of the three.
                     // returns the impression number as well as id of the "object" that caused the impression.
                     var impressions = senses[sense][1]([locations, being]);
@@ -344,14 +348,24 @@ function presentWorldAndGetActions(world) {
                             // Check if impression triggers the specific trigger
                             if (checkIfImpressionTriggersTrigger(impressions[i][0], trigger, sense)) {
                                 //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
+
                                 if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
                                     //console.log("YES YES YES => this tract is winning!");
                                     chosenTract = tract;
-                                    chosenTract.objId = impressions[i][1].id;
-                                    chosenTract.location = impressions[i][1].location;
+                                    affectedObjectId = impressions[i][1].id;
+                                    affectedObjectLocation = impressions[i][1].location;
                                     
                                     // No need to continue checking
-                                    if (sense == 0) stats.visionTriggersGenerated++;
+                                    if (sense == 0) {
+                                        stats.visionTriggersGenerated++;
+                                        being.lastImpressions = impressions[i];
+                                        being.lastTrigger = trigger;
+                                        if (stats.animalMonitored !== undefined) {
+                                            if (stats.animalMonitored.id === being.id) {
+                                                stats.animalActedUpon = impressions[i][1];  
+                                            }
+                                        }
+                                    }
                                     break;
                                 }
                             }
@@ -359,18 +373,14 @@ function presentWorldAndGetActions(world) {
                     }
                     // We have now found a tract with highest affinity. Make a world action and add to actions.
                     if (chosenTract !== undefined) {
-                        var beingThatCausedImpressions = locations[chosenTract.location].filter(obj => {
-                            return obj.id === chosenTract.objId;
+                        var beingThatCausedImpressions = locations[affectedObjectLocation].filter(obj => {
+                            return obj.id === affectedObjectId;
                         });
 
                         var chosenAction = senses[sense][2]([being, chosenTract.action, beingThatCausedImpressions]);
                         beingActions.push(chosenAction);
                     } else {
                         beingActions.push([]);
-                    }
-
-                    if (sense == 0) {
-                        being.lastImpressions = impressions;
                     }
                 }
 
@@ -447,6 +457,7 @@ function tickWorld(world, actions) {
     world.stats.highestEnergyAnimal.energy = 0;
     world.stats.mostConsecutiveEnergyIncreases = {};
     world.stats.mostConsecutiveEnergyIncreases.consecutiveEnergyIncreases = 0;
+    
 
     world.locations.filter(location => {return location != null;}).forEach(location => {
         location.forEach(being => {
@@ -516,6 +527,7 @@ function tickWorld(world, actions) {
     // Update image
     updateImage(world);
 
+    world.stats.animalActedUpon = {};
     if (world.stats.animalsAlive && world.running > 0) 
         window.setTimeout(function() {tickWorld(world, presentWorldAndGetActions(world));}, 1);
 }
@@ -545,16 +557,16 @@ function updateImage(world) {
     // pick the animal that we are looking a bit extra at
     switch(stats.animalTypeMonitored) {
         case "age": 
-            animalMonitored = stats.longestLivingAnimal;
+            stats.animalMonitored = stats.longestLivingAnimal;
             break;
         case "highEnergy":
-            animalMonitored = stats.highestEnergyAnimal;
+            stats.animalMonitored = stats.highestEnergyAnimal;
             break;
         case "increasedEnergy":
-            animalMonitored = stats.mostConsecutiveEnergyIncreases;
+            stats.animalMonitored = stats.mostConsecutiveEnergyIncreases;
             break;
         case "mostKids":
-            animalMonitored = stats.mostKidsAnimal;
+            stats.animalMonitored = stats.mostKidsAnimal;
             break;
         default:
             console.log("Failed to find appropriate type of animal.");
@@ -574,7 +586,7 @@ function updateImage(world) {
             
             if (being.isAnimal() && !being.isDead()) {
                 above ++;
-                b += 2;
+                b += 1;
                 ctx.fillStyle = "rgb(255, " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
                 var angle = Math.PI * being.location * 2 / stats.worldSize;
                 var x = origo + Math.cos(angle) * (radius + b);
@@ -645,17 +657,82 @@ function updateImage(world) {
     document.getElementById("below").innerHTML = below;
 
     // Longest living animal stats
-    document.getElementById("animalMonitoredId").innerHTML = animalMonitored.id;
-    document.getElementById("animalMonitoredAge").innerHTML = animalMonitored.age;
-    document.getElementById("animalMonitoredEnergy").innerHTML = animalMonitored.energy;
-    document.getElementById("animalMonitoredKidsSpawned").innerHTML = animalMonitored.numberOfKids;
-    document.getElementById("animalMonitoredConsecutiveEnergyIncreases").innerHTML = animalMonitored.consecutiveEnergyIncreases;
-    document.getElementById("animalMonitoredSize").innerHTML = animalMonitored.genome.size;
-    document.getElementById("animalMonitoredType").innerHTML = animalMonitored.genome.type;
-    document.getElementById("animalMonitoredShape").innerHTML = animalMonitored.genome.shape;
-    //document.getElementById("animalMonitoredLastImpressions").innerHTML = stats.animalMonitored.lastImpressions;
-    document.getElementById("animalMonitoredLastActions").innerHTML = animalMonitored.lastActions;
+    document.getElementById("animalMonitoredId").innerHTML = stats.animalMonitored.id;
+    document.getElementById("animalMonitoredAge").innerHTML = stats.animalMonitored.age;
+    document.getElementById("animalMonitoredLocation").innerHTML = stats.animalMonitored.location;
+    document.getElementById("animalMonitoredEnergy").innerHTML = stats.animalMonitored.energy;
+    document.getElementById("animalMonitoredKidsSpawned").innerHTML = stats.animalMonitored.numberOfKids;
+    document.getElementById("animalMonitoredConsecutiveEnergyIncreases").innerHTML = stats.animalMonitored.consecutiveEnergyIncreases;
+    document.getElementById("animalMonitoredSize").innerHTML = stats.animalMonitored.genome.size;
+    document.getElementById("animalMonitoredType").innerHTML = stats.animalMonitored.genome.type;
+    document.getElementById("animalMonitoredShape").innerHTML = stats.animalMonitored.genome.shape;
+    document.getElementById("animalMonitoredLastImpressions").innerHTML = stats.animalMonitored.lastImpressions[0] + (stats.animalMonitored.lastImpressions[1] === undefined ? "" : ", " + stats.animalMonitored.lastImpressions[1].id);
+    document.getElementById("animalMonitoredLastTrigger").innerHTML = stats.animalMonitored.lastTrigger;
+    document.getElementById("animalMonitoredLastActions").innerHTML = actionsToText(stats.animalMonitored.lastActions);
 
+    // Animal acted upon stats
+    document.getElementById("animalActedUponId").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.id : "";
+    document.getElementById("animalActedUponAge").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.age : "";
+    document.getElementById("animalActedUponLocation").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.location : "";
+    document.getElementById("animalActedUponEnergy").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.energy : "";
+    document.getElementById("animalActedUponKidsSpawned").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.numberOfKids : "";
+    document.getElementById("animalActedUponConsecutiveEnergyIncreases").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.consecutiveEnergyIncreases : "";
+    document.getElementById("animalActedUponSize").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.size : "";
+    document.getElementById("animalActedUponType").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.type : "";
+    document.getElementById("animalActedUponShape").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.shape : "";
+    //document.getElementById("animalActedUponLastImpressions").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.lastImpressions[0] + ", " + animalActedUpon.lastImpressions[1].id : "";
+    //document.getElementById("animalActedUponLastTrigger").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.lastTrigger : "";
+    //document.getElementById("animalActedUponLastActions").innerHTML = stats.animalActedUpon !== {} ? actionsToText(stats.animalActedUpon.lastActions) : "";
 
 }   
 
+function actionsToText(actions) {
+    var result = "";
+    actions.forEach(action => {
+        if (action.length > 0) {
+            if (action[0].length !== undefined) {
+                // Multiple actions, need to iterate
+                for (var a = 0; a < action.length; a++) {
+                    var subaction = action[a];
+                    switch (subaction[0]) {
+                        case 0:
+                            result += "Move " + Math.abs(subaction[1][1]) + " to the " + (subaction[1][1] <= 0 ? " left.\n" : " right.\n");
+                            break;
+                        case 1:
+                            result += "Animal " + subaction[1][0].id + " changes energy " + subaction[1][1] + "\n";
+                            break;
+                        case 2:
+                            result += "Affinity " + subaction[1][1] + "/" + subaction[1][2] + " adjusted " + subaction[1][3] + ".\n";
+                            break;
+                        case 3:
+                            result += "Spawning " + subaction[1][1] + " kids with energy " + subaction[1][2] + "\n";
+                            break;
+                
+                        default:
+                            break;
+                    }
+                }
+            } else {
+                // Not a multiple action array
+                switch (action[0]) {
+                    case 0:
+                        result += "Move " + Math.abs(action[1][1]) + " to the " + (action[1][1] <= 0 ? " left.\n" : " right.\n");
+                        break;
+                    case 1:
+                        result += "Animal " + action[1][0].id + " changes energy " + action[1][1] + "\n";
+                        break;
+                    case 2:
+                        result += "Affinity " + action[1][1] + "/" + action[1][2] + " adjusted " + action[1][3] + ".\n";
+                        break;
+                    case 3:
+                        result += "Spawning " + action[1][1] + " kids with energy " + action[1][2] + "\n";
+                        break;
+            
+                    default:
+                        break;
+                }
+            }
+        }
+    });
+    return result;
+}
