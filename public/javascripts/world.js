@@ -593,12 +593,20 @@ function updateImage(world) {
                 var y = origo + Math.sin(angle) * (radius + b);
                 ctx.fillRect( x, y, 1, 1 );
 
-                if (being.id == animalMonitored.id) {
-                    ctx.fillStyle="red";
+                if (being.id == stats.animalMonitored.id) {
+                    ctx.fillStyle = 'red';
                     ctx.beginPath();
                     ctx.arc(x, y, 5, 0, 2 * Math.PI);
                     ctx.stroke();
                 }
+
+                if (being.id == stats.animalActedUpon.id) {
+                    ctx.fillStyle = 'green';
+                    ctx.beginPath();
+                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+
             }
             else {
                 below ++;
