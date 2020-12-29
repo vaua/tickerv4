@@ -412,7 +412,7 @@
             var animal = params[0];
             var action = params[1];
 
-            if (action < Math.pow(2, (internalActionBits - 1)) + 70) {
+            if (action < Math.pow(2, (internalActionBits - 1)) + 30) {
                 // The action is to adjust affinity
 
                 var tractToAdjust = action % 32;

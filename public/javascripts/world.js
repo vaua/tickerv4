@@ -2,7 +2,7 @@
 
 (function (exports) {
 
-    const world_size = 500;
+    const world_size = 1500;
     const energy_norm = 200;
     
     function World() {
@@ -26,6 +26,7 @@
         this.stats.worldSize = world_size;
         this.stats.animalTypeMonitored = "age";
         this.running = false;
+        this.stats.reboots = 0;
 
         this.target_beings = 1550;
 
@@ -506,13 +507,15 @@ function tickWorld(world, actions) {
 
 
             // Replenish the world if necessary
-            if (world.stats.beingsAlive < (world.target_beings / 2)) {
+            if (world.stats.beingsAlive < 500) {
                 // Create some more beings
-                for (var i = 0; i < (world.target_beings / 2); i++) {
+                for (var i = 0; i < (getRandomInt(world.target_beings * 2)); i++) {
                     world.createNewRandomAnimal();
                 }
+                world.stats.reboots++;
             }
 
+             
             world.stats.beingsProcessed++;
         });
     });
@@ -660,6 +663,7 @@ function updateImage(world) {
     document.getElementById("executionDuration").innerHTML = stats.executionDuration;
     document.getElementById("tickedPerSecond").innerHTML = stats.animalsTickedPerSecond;
     document.getElementById("imageUpdateTime").innerHTML = Date.now() - stats.imageUpdateTimeStart;
+    document.getElementById("reboots").innerHTML = stats.reboots;
 
     document.getElementById("above").innerHTML = above;
     document.getElementById("below").innerHTML = below;

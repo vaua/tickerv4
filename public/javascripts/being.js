@@ -33,7 +33,11 @@
     Being.prototype.tick = function() {
         if (!this.isDead()) {
             // for living creatures, decrease energy based on size
-            this.energy -= energyLoss * (this.genome.size + 1);
+            if (this.isAnimal()) {
+                this.energy -= energyLoss * (this.genome.size + 1);
+            } else {
+                this.energy += 20;
+            }
             this.age++;
         } else {
             // for dead beings, just ordinary decay...
