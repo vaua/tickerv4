@@ -71,6 +71,10 @@
         return this.dead;
     }
 
+    Being.prototype.hasSenses = function() {
+        return this.genome.tracts.length > 0;
+    }
+
     Being.prototype.checkForDeath = function() {
         if (this.energy <= 0 && !this.isDead()) {
             this.genome.tracts = [];

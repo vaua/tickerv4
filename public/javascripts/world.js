@@ -158,10 +158,7 @@ function presentWorldAndGetActions(world) {
                 //var senses = gene.senses;
                 var beingActions = [];
 
-                // Get number of senses by checking the tract first dimension
-                var numberOfSenses = being.genome.tracts.length;
-
-                if (numberOfSenses > 0) {
+                if (being.hasSenses()) {
 
                     for (var sense in beingTypeToSensesMapping[being.genome.type]) {
                         var chosenTract;
@@ -175,9 +172,6 @@ function presentWorldAndGetActions(world) {
                         // Check, for each impression, it any of the tracts is triggered.
                         for (var i = 0; i < impressions.length; i++) {
                             var tractsOfThisSense = being.genome.tracts[sense];
-                            if (tractsOfThisSense === undefined) {
-                                console.log("Not good.");
-                            }
 
                             if (sense == 0) stats.visionImpressionsChecked++;
                             for (var t = 0; t < tractsOfThisSense.length; t++) {
@@ -347,14 +341,15 @@ function tickWorld(world, actions) {
 
 
             // Replenish the world if necessary
-            if (world.stats.beingsAlive < 500) {
-                // Create some more beings
-                for (var i = 0; i < (getRandomInt(world.target_beings * 2)); i++) {
-                    world.createNewRandomAnimal();
+            if (do_reboots) {
+                if (world.stats.beingsAlive < reboot_limit) {
+                    // Create some more beings
+                    for (var i = 0; i < (getRandomInt(world.target_beings * 2)); i++) {
+                        world.createNewRandomAnimal();
+                    }
+                    world.stats.reboots++;
                 }
-                world.stats.reboots++;
             }
-
              
             world.stats.beingsProcessed++;
         });
