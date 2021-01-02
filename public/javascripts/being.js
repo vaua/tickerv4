@@ -60,7 +60,7 @@
     }
 
     Being.prototype.isDecomposed = function() {
-        return this.energy <= -(energyContent * this.genome.size);
+        return this.energy <= -(energyContent * this.genome.size * 5);
     }
 
     Being.prototype.isAnimal = function() {

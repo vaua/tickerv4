@@ -381,12 +381,43 @@
         return s;
     }
 
+
+    // =======================================================
+
+    // Visual break between creating senses and help functions
+
+    // =======================================================
+
     function getSenses() {
         if (senses === undefined) senses = createSenses();
         return senses;
     }
 
+    function getTractGeneForSense(sense) {
+        if (senses === undefined) senses = createSenses();
+        
+        // Execute the first function in the genome code.
+        return senses[sense][0];
+    }
+
+    function getImpressionsForSense(sense) {
+        if (senses === undefined) senses = createSenses();
+        
+        // Execute the second function in the genome code.
+        return senses[sense][1];
+    }
+
+    function getActionsForSense(sense) {
+        if (senses === undefined) senses = createSenses();
+        
+        // Execute the second function in the genome code.
+        return senses[sense][2];
+    }
+
     Sense.getSenses = getSenses;
+    Sense.getTractGeneForSense = getTractGeneForSense;
+    Sense.getImpressionsForSense = getImpressionsForSense;
+    Sense.getActionsForSense = getActionsForSense;
 
 
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {

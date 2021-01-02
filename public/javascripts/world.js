@@ -2,9 +2,6 @@
 
 (function (exports) {
 
-    const world_size = 1500;
-    const energy_norm = 200;
-    
     function World() {
         this.cycle = 0;
         this.locations = [];
@@ -28,7 +25,7 @@
         this.running = false;
         this.stats.reboots = 0;
 
-        this.target_beings = 1550;
+        this.target_beings = target_beings;
 
         console.log("Starting world.");
 
@@ -38,7 +35,7 @@
 
 
         // Setup world
-        setupWorld(this);
+        window.Action.initiateWorldActions(this);
 
         // create Initial creatures
         for (var i = 0; i < this.target_beings; i++) {
@@ -94,6 +91,16 @@
         }
     }
 
+    World.prototype.checkCorrectLocation = function (being) {
+        for (var i = 0; i < this.locations[being.location].length; i++) {
+            if (this.locations[being.location][i].id == being.id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function getRandomInt(max) {
         return Math.floor(Math.random() * Math.floor(max));
     }
@@ -102,193 +109,20 @@
         return getRandomInt(world_size);
     }
 
-    function checkCorrectLocation(animal, locations) {
-        for (var i = 0; i < locations[animal.location].length; i++) {
-            if (locations[animal.location][i].id == animal.id) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    function setupWorld(world) {
-        // Populating the world with actions
-        // The world currently contains the follwing actions:
-        // changeLocation, changeEnergy, changeAffinity, giveBirth
-
-        // Change location will take locations, animal, delta as params.
-        var changeLocation = function (params) {
-            if (params.length != 2) {
-                console.log("Wrong amount of params given to changeLocation action!");
-                return;
-            }
-
-
-            // Assign the args
-            var being = params[0];
-            var locationDelta = params[1];
-
-            //console.log("Changing location for animal " + being.id + " with delta " + locationDelta);
-            //console.log("Current animal localtion is: " + animal.location + ", in world location: " + world.locations[animal.location]);
-
-            // Check that the animal is in the location it says it is.
-            if (checkCorrectLocation(being, world.locations)) {
-                var newLocation = (being.location + locationDelta) % world_size;
-                if (newLocation < 0) newLocation += world_size;
-                
-                // Update the location, and the animal location.
-                // First, remove the animal from the location it is in.
-                var beingIndex = getBeingIndex(being, world.locations[being.location]);
-                world.locations[being.location].splice(beingIndex, 1);
-
-                /*for (var l = 0; l < world.locations[being.location].length; l++) {
-                    if (world.locations[being.location][l].id == being.id) {
-                        console.log("Unqualified. Should have left already.");
-                    }
-                }*/
-                
-                // Then, add it to the new location.
-                world.addToLocation(newLocation, being);
-
-                //console.log("New location is: " + being.location);
-                world.stats.locationChanged++;
-            } else {
-                console.log("Something is corrupted, the location of the animal is wrong.");
-            }
-        }
-
-        var changeEnergy = function (params) {
-            if (params.length != 2) {
-                console.log("Wrong amount of params given to changeEnergy action!");
-                return;
-            }
-
-            var being = params[0];
-            var energyDelta = params[1];
-
-            being.energy += energyDelta;
-            world.stats.energyChanged++;
-        }
-
-        var changeAffinity = function (params) {
-            if (params.length != 4) {
-                console.log("Wrong amount of params given to changeAffinity action!");
-                return;
-            }
-
-            var being = params[0];
-            var sense = params[1];
-            var tract = params[2];
-            var delta = params[3];
-
-            // Adjust the affinities
-            being.affinities[sense][tract] += delta;
-            world.stats.affinityChanged++;
-        }
-
-        var giveBirth = function (params) {
-            if (params.length != 3) {
-                console.log("Wrong amount of params given to giveBirth action!");
-                return;
-            }
-
-            // At this point, we are just duplicating. Mutations will be added Later
-            var being = params[0];
-            var numberOfKids = params[1];
-            var energyPercentage = params[2];
-
-            var energyGiven = Math.floor(being.energy * 0.15 * energyPercentage);
-
-            being.energy -= energyGiven;
-            var energyPerKid = Math.floor(energyGiven / numberOfKids);
-
-            
-
-            for (var i = 0; i < numberOfKids; i++) {
-                var child = new Being(world.stats.beingsCreated++, energyPerKid, being.genome, being.orientation);
-                being.numberOfKids++;
-                if (child.isAnimal()) {
-                    world.stats.animalsCreated ++;
-                    world.stats.animalsAlive ++;
-                } else {
-                    world.stats.plantsCreated ++;
-                    world.stats.plantsAlive ++;
-                }
-
-                
-                /*for (var l = 0; l < world.locations[being.location].length; l++) {
-                    if (world.locations[being.location][l].id == child.id) {
-                        console.log("Unqualified, maybe even worse. Should have left already.");
-                    }
-                }*/
-
-                world.addToLocation(being.location, child);
-            }
-
-            world.stats.birthsGiven += numberOfKids;
-            world.stats.beingsAlive += numberOfKids;
-        }
-
-        world.worldActions.push(changeLocation);
-        world.worldActions.push(changeEnergy);
-        world.worldActions.push(changeAffinity);
-        world.worldActions.push(giveBirth);
-
-        // Create genes?
-
-    }
-
-
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {
         console.log("Returning World!");
         module.exports = World;
     } else {
-        //this['Genome']={};
         window.World = World;
     }
 
 
 }) ();
-    
-// ======================================================================================= //
-// Other functions
-// ======================================================================================= //
-
-
-function startWorld() {
-    document.getElementById("status").innerHTML = "Status: Creating world."
-    window.world = new World();
-    document.getElementById("status").innerHTML = "Status: World created."
-}
-
-function togglePauseWorld() {
-    document.getElementById("status").innerHTML = window.world.running ? "Status: World paused." : "Status: World running.";
-    window.world.running = !window.world.running;
-
-    if (window.world.running === true) {
-        tickWorld(window.world, presentWorldAndGetActions(window.world));
-    }
-}
-
-function executeOneTick() {
-    if (!window.world.running) {
-        document.getElementById("status").innerHTML = "Status: executing one step.";
-
-        tickWorld(window.world, presentWorldAndGetActions(window.world));
-        document.getElementById("status").innerHTML = "Status: World paused.";
-    }
-}
-
-function onRadioClick(radio) {
-    window.world.stats.animalTypeMonitored = radio.value;
-    console.log("Changed to: " + radio.value);
-}
+   
 
 function getBeingIndex(being, location) {
     return location.findIndex(function(b) {return b.id == being.id});
 }
-
 
 
 // This function prepares the environment for each being and executes it,
@@ -321,67 +155,73 @@ function presentWorldAndGetActions(world) {
                 // set highest chosen action.
 
                 // Get the senses definition from the Genome instance (gene).
-                var senses = gene.senses;
+                //var senses = gene.senses;
                 var beingActions = [];
 
                 // Get number of senses by checking the tract first dimension
                 var numberOfSenses = being.genome.tracts.length;
 
-                for (var sense = 0; sense < numberOfSenses; sense++) {
-                    var chosenTract;
-                    var affectedObjectId;
-                    var affectedObjectLocation;
+                if (numberOfSenses > 0) {
 
-                    // get Impression from the sense, second method of the three.
-                    // returns the impression number as well as id of the "object" that caused the impression.
-                    var impressions = senses[sense][1]([locations, being]);
+                    for (var sense in beingTypeToSensesMapping[being.genome.type]) {
+                        var chosenTract;
+                        var affectedObjectId;
+                        var affectedObjectLocation;
 
-                    // Check, for each impression, it any of the tracts is triggered.
-                    for (var i = 0; i < impressions.length; i++) {
-                        var tractsOfThisSense = being.genome.tracts[sense];
+                        // get Impression from the sense, second method of the three.
+                        // returns the impression number as well as id of the "object" that caused the impression.
+                        var impressions = window.Sense.getImpressionsForSense(sense)([locations, being]);
 
-                        if (sense == 0) stats.visionImpressionsChecked++;
-                        for (var t = 0; t < tractsOfThisSense.length; t++) {
-                            var tract = tractsOfThisSense[t];
-                            var trigger = tract.trigger;
-                            //console.log("Checking " + impressions[i][0] + " against tract " + trigger);
+                        // Check, for each impression, it any of the tracts is triggered.
+                        for (var i = 0; i < impressions.length; i++) {
+                            var tractsOfThisSense = being.genome.tracts[sense];
+                            if (tractsOfThisSense === undefined) {
+                                console.log("Not good.");
+                            }
 
-                            // Check if impression triggers the specific trigger
-                            if (checkIfImpressionTriggersTrigger(impressions[i][0], trigger, sense)) {
-                                //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
+                            if (sense == 0) stats.visionImpressionsChecked++;
+                            for (var t = 0; t < tractsOfThisSense.length; t++) {
+                                var tract = tractsOfThisSense[t];
+                                var trigger = tract.trigger;
+                                //console.log("Checking " + impressions[i][0] + " against tract " + trigger);
 
-                                if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
-                                    //console.log("YES YES YES => this tract is winning!");
-                                    chosenTract = tract;
-                                    affectedObjectId = impressions[i][1].id;
-                                    affectedObjectLocation = impressions[i][1].location;
-                                    
-                                    // No need to continue checking
-                                    if (sense == 0) {
-                                        stats.visionTriggersGenerated++;
-                                        being.lastImpressions = impressions[i];
-                                        being.lastTrigger = trigger;
-                                        if (stats.animalMonitored !== undefined) {
-                                            if (stats.animalMonitored.id === being.id) {
-                                                stats.animalActedUpon = impressions[i][1];  
+                                // Check if impression triggers the specific trigger
+                                if (checkIfImpressionTriggersTrigger(impressions[i][0], trigger, sense)) {
+                                    //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
+
+                                    if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
+                                        //console.log("YES YES YES => this tract is winning!");
+                                        chosenTract = tract;
+                                        affectedObjectId = impressions[i][1].id;
+                                        affectedObjectLocation = impressions[i][1].location;
+                                        
+                                        // No need to continue checking
+                                        if (sense == 0) {
+                                            stats.visionTriggersGenerated++;
+                                            being.lastImpressions = impressions[i];
+                                            being.lastTrigger = trigger;
+                                            if (stats.animalMonitored !== undefined) {
+                                                if (stats.animalMonitored.id === being.id) {
+                                                    stats.animalActedUpon = impressions[i][1];  
+                                                }
                                             }
                                         }
+                                        break;
                                     }
-                                    break;
                                 }
                             }
                         }
-                    }
-                    // We have now found a tract with highest affinity. Make a world action and add to actions.
-                    if (chosenTract !== undefined) {
-                        var beingThatCausedImpressions = locations[affectedObjectLocation].filter(obj => {
-                            return obj.id === affectedObjectId;
-                        });
+                        // We have now found a tract with highest affinity. Make a world action and add to actions.
+                        if (chosenTract !== undefined) {
+                            var beingThatCausedImpressions = locations[affectedObjectLocation].filter(obj => {
+                                return obj.id === affectedObjectId;
+                            });
 
-                        var chosenAction = senses[sense][2]([being, chosenTract.action, beingThatCausedImpressions]);
-                        beingActions.push(chosenAction);
-                    } else {
-                        beingActions.push([]);
+                            var chosenAction = window.Sense.getActionsForSense(sense)([being, chosenTract.action, beingThatCausedImpressions]);
+                            beingActions.push(chosenAction);
+                        } else {
+                            beingActions.push([]);
+                        }
                     }
                 }
 
@@ -528,223 +368,9 @@ function tickWorld(world, actions) {
     world.stats.animalsTickedPerSecond = Math.floor((world.stats.beingsProcessed * 1000) / world.stats.tickDuration);
 
     // Update image
-    updateImage(world);
+    renderWorld(world);
 
     world.stats.animalActedUpon = {};
     if (world.stats.animalsAlive && world.running > 0) 
         window.setTimeout(function() {tickWorld(world, presentWorldAndGetActions(world));}, 1);
-}
-
-
-// This function paints an update based on animal locations.
-function updateImage(world) {
-
-    const radius = 150;
-    const origo = 350;
-    var stats = world.stats;
-    var locations = world.locations;
-    var ctx = world.ctx;
-    var above = 0;
-    var below = 0;
-    var animalMonitored = {};
-
-    console.log("Updating image.");
-    stats.imageUpdateTimeStart = Date.now();
-
-    
-    ctx.clearRect(0, 0, 700, 700);
-    ctx.beginPath();
-    ctx.arc(origo, origo, radius, 0, 2 * Math.PI);
-    ctx.stroke();
-
-    // pick the animal that we are looking a bit extra at
-    switch(stats.animalTypeMonitored) {
-        case "age": 
-            stats.animalMonitored = stats.longestLivingAnimal;
-            break;
-        case "highEnergy":
-            stats.animalMonitored = stats.highestEnergyAnimal;
-            break;
-        case "increasedEnergy":
-            stats.animalMonitored = stats.mostConsecutiveEnergyIncreases;
-            break;
-        case "mostKids":
-            stats.animalMonitored = stats.mostKidsAnimal;
-            break;
-        default:
-            console.log("Failed to find appropriate type of animal.");
-            break;
-    }
-
-    locations.forEach(location => {
-        var o = 0;
-        var b = 0;
-        if (location == null) return;
-        location.forEach(being => {
-
-            if (being == null) return;
-            // Radius r
-            // Translate location l into x, y on circle r
-            // 2pi / max * location = angle
-            
-            if (being.isAnimal() && !being.isDead()) {
-                above ++;
-                b += 1;
-                ctx.fillStyle = "rgb(255, " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
-                var angle = Math.PI * being.location * 2 / stats.worldSize;
-                var x = origo + Math.cos(angle) * (radius + b);
-                var y = origo + Math.sin(angle) * (radius + b);
-                ctx.fillRect( x, y, 1, 1 );
-
-                if (being.id == stats.animalMonitored.id) {
-                    ctx.fillStyle = 'red';
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                    ctx.stroke();
-                }
-
-                if (being.id == stats.animalActedUpon.id) {
-                    ctx.fillStyle = 'green';
-                    ctx.beginPath();
-                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
-                    ctx.stroke();
-                }
-
-            }
-            else {
-                below ++;
-                o += 1;
-                if (o > radius) o = radius;
-                ctx.fillStyle = "rgb(0, " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
-                var angle = Math.PI * being.location * 2 / stats.worldSize;
-                var x = origo + Math.cos(angle) * (radius - o);
-                var y = origo + Math.sin(angle) * (radius - o);
-                ctx.fillRect( x, y, 1, 1 );
-            }
-            
-        });
-    });
-
-    
-
-    ctx.stroke();
-
-    // Update stats
-    // World stats
-    document.getElementById("tickNr").innerHTML = stats.tickNr;
-
-    document.getElementById("beingsAlive").innerHTML = stats.beingsAlive;
-    document.getElementById("beingsCreated").innerHTML = stats.beingsCreated;
-    document.getElementById("beingsDead").innerHTML = stats.beingsDead;
-    document.getElementById("beingsRemoved").innerHTML = stats.beingsRemoved;
-    document.getElementById("beingsProcessed").innerHTML = stats.beingsProcessed;
-
-    document.getElementById("birthsGiven").innerHTML = stats.birthsGiven;
-    document.getElementById("animalsCreated").innerHTML = stats.animalsCreated;
-    document.getElementById("animalsAlive").innerHTML = stats.animalsAlive;
-    document.getElementById("plantsCreated").innerHTML = stats.plantsCreated;
-    document.getElementById("plantsAlive").innerHTML = stats.plantsAlive;
-
-    document.getElementById("averageAnimalAge").innerHTML = Math.floor(stats.averageAnimalAge / stats.animalsProcessed);
-    document.getElementById("averageDeadAnimalAge").innerHTML = Math.floor(stats.averageDeadAnimalAge / stats.animalsDeadThisTick);
-    document.getElementById("animalsDeadThisTick").innerHTML = stats.animalsDeadThisTick;
-    document.getElementById("oldestLivingAnimal").innerHTML = stats.longestLivingAnimal.age;
-
-    document.getElementById("actionsLastTick").innerHTML = stats.actionsLastTick;
-
-    document.getElementById("locationChanged").innerHTML = stats.locationChanged;
-    document.getElementById("energyChanged").innerHTML = stats.energyChanged;
-    document.getElementById("affinityChanged").innerHTML = stats.affinityChanged;
-    document.getElementById("visionImpressionsChecked").innerHTML = stats.visionImpressionsChecked;
-    document.getElementById("visionTriggersGenerated").innerHTML = stats.visionTriggersGenerated;
-    document.getElementById("visionTriggeredPerAnimal").innerHTML = Math.floor(stats.visionTriggersGenerated / stats.animalsAlive * 100);
-    
-    document.getElementById("tickDuration").innerHTML = stats.tickDuration;
-    document.getElementById("executionDuration").innerHTML = stats.executionDuration;
-    document.getElementById("tickedPerSecond").innerHTML = stats.animalsTickedPerSecond;
-    document.getElementById("imageUpdateTime").innerHTML = Date.now() - stats.imageUpdateTimeStart;
-    document.getElementById("reboots").innerHTML = stats.reboots;
-
-    document.getElementById("above").innerHTML = above;
-    document.getElementById("below").innerHTML = below;
-
-    // Longest living animal stats
-    document.getElementById("animalMonitoredId").innerHTML = stats.animalMonitored.id;
-    document.getElementById("animalMonitoredAge").innerHTML = stats.animalMonitored.age;
-    document.getElementById("animalMonitoredLocation").innerHTML = stats.animalMonitored.location;
-    document.getElementById("animalMonitoredEnergy").innerHTML = stats.animalMonitored.energy;
-    document.getElementById("animalMonitoredKidsSpawned").innerHTML = stats.animalMonitored.numberOfKids;
-    document.getElementById("animalMonitoredConsecutiveEnergyIncreases").innerHTML = stats.animalMonitored.consecutiveEnergyIncreases;
-    document.getElementById("animalMonitoredSize").innerHTML = stats.animalMonitored.genome.size;
-    document.getElementById("animalMonitoredType").innerHTML = stats.animalMonitored.genome.type;
-    document.getElementById("animalMonitoredShape").innerHTML = stats.animalMonitored.genome.shape;
-    document.getElementById("animalMonitoredLastImpressions").innerHTML = stats.animalMonitored.lastImpressions[0] + (stats.animalMonitored.lastImpressions[1] === undefined ? "" : ", " + stats.animalMonitored.lastImpressions[1].id);
-    document.getElementById("animalMonitoredLastTrigger").innerHTML = stats.animalMonitored.lastTrigger;
-    document.getElementById("animalMonitoredLastActions").innerHTML = actionsToText(stats.animalMonitored.lastActions);
-
-    // Animal acted upon stats
-    document.getElementById("animalActedUponId").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.id : "";
-    document.getElementById("animalActedUponAge").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.age : "";
-    document.getElementById("animalActedUponLocation").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.location : "";
-    document.getElementById("animalActedUponEnergy").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.energy : "";
-    document.getElementById("animalActedUponKidsSpawned").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.numberOfKids : "";
-    document.getElementById("animalActedUponConsecutiveEnergyIncreases").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.consecutiveEnergyIncreases : "";
-    document.getElementById("animalActedUponSize").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.size : "";
-    document.getElementById("animalActedUponType").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.type : "";
-    document.getElementById("animalActedUponShape").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.shape : "";
-    //document.getElementById("animalActedUponLastImpressions").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.lastImpressions[0] + ", " + animalActedUpon.lastImpressions[1].id : "";
-    //document.getElementById("animalActedUponLastTrigger").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.lastTrigger : "";
-    //document.getElementById("animalActedUponLastActions").innerHTML = stats.animalActedUpon !== {} ? actionsToText(stats.animalActedUpon.lastActions) : "";
-
-}   
-
-function actionsToText(actions) {
-    var result = "";
-    actions.forEach(action => {
-        if (action.length > 0) {
-            if (action[0].length !== undefined) {
-                // Multiple actions, need to iterate
-                for (var a = 0; a < action.length; a++) {
-                    var subaction = action[a];
-                    switch (subaction[0]) {
-                        case 0:
-                            result += "Move " + Math.abs(subaction[1][1]) + " to the " + (subaction[1][1] <= 0 ? " left.\n" : " right.\n");
-                            break;
-                        case 1:
-                            result += "Animal " + subaction[1][0].id + " changes energy " + subaction[1][1] + "\n";
-                            break;
-                        case 2:
-                            result += "Affinity " + subaction[1][1] + "/" + subaction[1][2] + " adjusted " + subaction[1][3] + ".\n";
-                            break;
-                        case 3:
-                            result += "Spawning " + subaction[1][1] + " kids with energy " + subaction[1][2] + "\n";
-                            break;
-                
-                        default:
-                            break;
-                    }
-                }
-            } else {
-                // Not a multiple action array
-                switch (action[0]) {
-                    case 0:
-                        result += "Move " + Math.abs(action[1][1]) + " to the " + (action[1][1] <= 0 ? " left.\n" : " right.\n");
-                        break;
-                    case 1:
-                        result += "Animal " + action[1][0].id + " changes energy " + action[1][1] + "\n";
-                        break;
-                    case 2:
-                        result += "Affinity " + action[1][1] + "/" + action[1][2] + " adjusted " + action[1][3] + ".\n";
-                        break;
-                    case 3:
-                        result += "Spawning " + action[1][1] + " kids with energy " + action[1][2] + "\n";
-                        break;
-            
-                    default:
-                        break;
-                }
-            }
-        }
-    });
-    return result;
 }
