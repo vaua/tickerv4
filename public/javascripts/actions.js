@@ -92,6 +92,8 @@
             var numberOfKids = params[1];
             var energyPercentage = params[2];
 
+            if (world.locations[being.location].length > max_beings_per_location) return;
+
             var energyGiven = Math.floor(being.energy * 0.15 * energyPercentage);
 
             being.energy -= energyGiven;

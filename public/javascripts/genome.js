@@ -21,23 +21,22 @@
 
         // Create a fully random Genome
         this.tracts = [];
-        //this.code = [];
 
         this.size = getRandomInt(animalSizeSpace);
         this.shape = getRandomInt(animalShapeSpace);
         this.type = getRandomInt(animalTypeSpace);
 
-        for (var sense in beingTypeToSensesMapping[this.type]) {
+        // For each sense that this type of animal has
+        beingTypeToSensesMapping[this.type].forEach(sense => {
+            
             this.tracts[sense] = [];
 
-            var numberOfTracts = getRandomInt(maxTracts);
+            var numberOfTracts = getRandomInt(maxTracts[sense]);
             for (var i = 0; i < numberOfTracts; i++) {
-                //console.log("Sense is: " + senses[s][0]);
                 var tract = Sense.getTractGeneForSense(sense)();
                 this.tracts[sense][i] = tract;
-                //console.log("Added a tract " + tract + " to genome.");
             }
-        }
+        });
     }
 
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {

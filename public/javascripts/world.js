@@ -87,7 +87,6 @@
             this.locations[location] = [];
             this.locations[location].push(being);
             being.location = location;
-            console.log("Created a new location " + location + " array and added an animal " + being.id);
         }
     }
 
@@ -160,7 +159,7 @@ function presentWorldAndGetActions(world) {
 
                 if (being.hasSenses()) {
 
-                    for (var sense in beingTypeToSensesMapping[being.genome.type]) {
+                    being.getSensesArray().forEach(sense => {
                         var chosenTract;
                         var affectedObjectId;
                         var affectedObjectLocation;
@@ -183,7 +182,11 @@ function presentWorldAndGetActions(world) {
                                 if (checkIfImpressionTriggersTrigger(impressions[i][0], trigger, sense)) {
                                     //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
 
+                                    if (sense == 1 && trigger > 7) {
+                                        console.log("Got myself a smart parent.");
+                                    }
                                     if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
+                                        
                                         //console.log("YES YES YES => this tract is winning!");
                                         chosenTract = tract;
                                         affectedObjectId = impressions[i][1].id;
@@ -211,12 +214,14 @@ function presentWorldAndGetActions(world) {
                                 return obj.id === affectedObjectId;
                             });
 
+
                             var chosenAction = window.Sense.getActionsForSense(sense)([being, chosenTract.action, beingThatCausedImpressions]);
+
                             beingActions.push(chosenAction);
                         } else {
                             beingActions.push([]);
                         }
-                    }
+                    });
                 }
 
 
