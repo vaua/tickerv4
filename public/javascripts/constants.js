@@ -2,8 +2,8 @@
 const world_size = 1500;
 const energy_norm = 200;
 const target_beings = 5550;
-const do_reboots = false;
-const reboot_limit = 500;
+const do_reboots = true;
+const reboot_limit = 10;
 const max_beings_per_location = 60;
 
 const high_growth_areas_number = 5;
@@ -20,7 +20,7 @@ const animalShapeBits = 3;
 const distanceBits = 3;
 const visionActionBits = 5;
 const affinityBits = 4;
-const maxTracts = [64, 4];
+const maxTracts = [64, 12];
 
 const animalSizeSpace = Math.pow(2, animalSizeBits);
 const animalTypeSpace = Math.pow(2, animalTypeBits);

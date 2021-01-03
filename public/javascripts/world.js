@@ -347,9 +347,10 @@ function tickWorld(world, actions) {
 
             // Replenish the world if necessary
             if (do_reboots) {
-                if (world.stats.beingsAlive < reboot_limit) {
+                if (world.stats.animalsAlive < reboot_limit) {
                     // Create some more beings
-                    for (var i = 0; i < (getRandomInt(world.target_beings * 2)); i++) {
+                    var new_limit = getRandomInt(target_beings * 2);
+                    for (var i = 0; i < new_limit; i++) {
                         world.createNewRandomAnimal();
                     }
                     world.stats.reboots++;
