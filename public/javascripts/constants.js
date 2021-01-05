@@ -1,10 +1,12 @@
  // World
 const world_size = 1500;
 const energy_norm = 200;
-const target_beings = 5550;
+const target_beings = 1550;
 const do_reboots = true;
 const reboot_limit = 10;
-const max_beings_per_location = 60;
+const max_beings_per_location = 30;
+const general_mutation_severity = 15;
+const wait_between_ticks_to_avoid_overheating_ms = 10;
 
 const high_growth_areas_number = 5;
 const high_growth_areas_size = 20;
@@ -27,6 +29,9 @@ const animalTypeSpace = Math.pow(2, animalTypeBits);
 const animalShapeSpace = Math.pow(2, animalShapeBits);
 const distanceSpace = Math.pow(2, distanceBits);
 
+const visionActionSpace = Math.pow(2, visionActionBits);
+const visionAffinitySpace = Math.pow(2, affinityBits);
+
 
 const visibility = distanceSpace;
 
@@ -38,6 +43,7 @@ const internalActionBits = 8;
 
 const internalTriggerSpace = Math.pow(2, (animalEnergyBits + animalEnergyDeltaBits));
 const internalActionSpace = Math.pow(2, internalActionBits);
+const internalAffinitySpace = Math.pow(2, affinityBits);
 const birthTractThreshold = Math.pow(2, (internalActionBits - 1));
 
 

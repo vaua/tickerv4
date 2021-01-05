@@ -1,9 +1,8 @@
 "use strict";
 
-
 (function(exports) {
 
-    function Genome() {
+    function Genome(empty) {
 
         // Create a random Genome
         // Each creature has three main attributes: size, shape and type.
@@ -20,6 +19,9 @@
         // This is the main motor of the simulation.
 
         // Create a fully random Genome
+
+        if (empty !== undefined && empty == true) return this;
+
         this.tracts = [];
 
         this.size = getRandomInt(animalSizeSpace);
@@ -37,6 +39,33 @@
                 this.tracts[sense][i] = tract;
             }
         });
+    }
+
+    Genome.prototype.mutate = function (severity) {
+        /* How shall we think here?
+        It's obvious that tracts should change. 
+        Maybe it's best if every sense tell us how to mutate it's own gene... 
+        like, insted of giving us a new random tract, it gives us a "modified" tract every time we ask.
+        That should do it pal!
+        */
+
+        var mutated = new Genome(true);
+
+        mutated.size = this.size;
+        mutated.shape = this.shape;
+        mutated.type = this.type;
+        mutated.tracts = [];
+
+        beingTypeToSensesMapping[this.type].forEach(sense => {
+            
+            mutated.tracts[sense] = [];
+            
+            this.tracts[sense].forEach(tract => {
+                mutated.tracts[sense].push(Sense.getMutatedTractGeneForSense(sense)([tract, severity]));
+            });
+        });
+
+        return mutated;
     }
 
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {

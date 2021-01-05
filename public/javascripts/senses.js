@@ -55,11 +55,18 @@
         return senses[sense][2];
     }
 
+    function getMutatedTractGeneForSense(sense) {
+        if (senses === undefined) senses = createSenses();
+        
+        // Execute the first function in the genome code.
+        return senses[sense][3];
+    }
+
     Sense.getSenses = getSenses;
     Sense.getTractGeneForSense = getTractGeneForSense;
     Sense.getImpressionsForSense = getImpressionsForSense;
     Sense.getActionsForSense = getActionsForSense;
-
+    Sense.getMutatedTractGeneForSense = getMutatedTractGeneForSense;
 
     if (typeof module !== 'undefined' && typeof module.exports !== 'undefined' ) {
         module.exports = Sense;

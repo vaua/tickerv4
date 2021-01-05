@@ -102,7 +102,7 @@
             
 
             for (var i = 0; i < numberOfKids; i++) {
-                var child = new Being(world.stats.beingsCreated++, energyPerKid, being.genome, being.orientation);
+                var child = new Being(world.stats.beingsCreated++, energyPerKid, being.genome.mutate(general_mutation_severity), being.orientation);
                 being.numberOfKids++;
                 if (child.isAnimal()) {
                     world.stats.animalsCreated ++;
@@ -111,14 +111,7 @@
                     world.stats.plantsCreated ++;
                     world.stats.plantsAlive ++;
                 }
-
                 
-                /*for (var l = 0; l < world.locations[being.location].length; l++) {
-                    if (world.locations[being.location][l].id == child.id) {
-                        console.log("Unqualified, maybe even worse. Should have left already.");
-                    }
-                }*/
-
                 world.addToLocation(being.location, child);
             }
 

@@ -39,15 +39,39 @@
             // Visual sense can lead to two actions, move or eat/attach. Move requires also parameter (forward / backward, and how much)
             // All this fits in range of 32 (2 pow 5). The function that will be translating the action to world action will know how to interpret:
             // 0-15: move, 0 most back, 15 most forward. 16-31: eat.
-            tract.action = getRandomInt(Math.pow(2, visionActionBits));
+            tract.action = getRandomInt(visionActionSpace);
 
             // Denotes the affinity animal has for this action. This can be changed during the animals life.
-            tract.affinity = getRandomInt(Math.pow(2, affinityBits));
+            tract.affinity = getRandomInt(visionAffinitySpace);
 
             return tract;
         }
 
+        // This function mutates the vision gene...
+        var getMutatedTractGeneForSense = function(params) {
+            if (params.length < 2) {
+                console.log("Wrong amount of params given to getMutatedTractGeneForSenseInternal function!");
+                return;
+            };
 
+            var tract = params[0];
+            var severity = params[1];
+
+            var mutated = {};
+            mutated.trigger = [tract.trigger[0], tract.trigger[1], tract.trigger[2]];
+            mutated.action = tract.action;
+            mutated.affinity = tract.affinity;
+
+            if (getRandomInt(100) < severity) {
+                mutated.action = (mutated.action + getRandomInt(12) - 6) % visionActionSpace;
+            }
+
+            if (getRandomInt(100) < severity) {
+                mutated.affinity = (mutated.affinity + getRandomInt(12) - 6) % visionAffinitySpace;
+            }
+
+            return mutated;
+        }
 
         // Expecting params: locations, animal. Now - the object animals id is known, but if we don't send the full batch, we
         // will not be able to fetch it. Answer - sent the full batch as parameter.
@@ -227,11 +251,13 @@
             }
         }
 
+
+
         // The sense is defined by its three actions:
         // 0 - create sense tract gene
         // 1 - express world into animal's rhealm
         // 2 - express animal's action into world's rhealm
-        vision.push(createVisionTractGene, createVisionImpressionsFromWorld, translateVisionActionToWorldAction);
+        vision.push(createVisionTractGene, createVisionImpressionsFromWorld, translateVisionActionToWorldAction, getMutatedTractGeneForSense);
         return vision;   
     }
 

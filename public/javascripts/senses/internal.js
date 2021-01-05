@@ -30,9 +30,35 @@
             tract.action = getRandomInt(internalActionSpace);
 
             // Denotes the affinity animal has for this action. This can be changed during the animals life.
-            tract.affinity = getRandomInt(Math.pow(2, affinityBits));
+            tract.affinity = getRandomInt(internalAffinitySpace);
 
             return tract;
+        }
+
+        // This function mutates the vision gene...
+        var getMutatedTractGeneForSense = function(params) {
+            if (params.length < 2) {
+                console.log("Wrong amount of params given to getMutatedTractGeneForSenseInternal function!");
+                return;
+            };
+
+            var tract = params[0];
+            var severity = params[1];
+
+            var mutated = {};
+            mutated.trigger = tract.trigger;
+            mutated.action = tract.action;
+            mutated.affinity = tract.affinity;
+
+            if (getRandomInt(100) < severity) {
+                mutated.action = (mutated.action + getRandomInt(12) - 6) % internalActionSpace;
+            }
+
+            if (getRandomInt(100) < severity) {
+                mutated.affinity = (mutated.affinity + getRandomInt(12) - 6) % internalAffinitySpace;
+            }
+
+            return mutated;
         }
 
 
@@ -126,7 +152,7 @@
         // 0 - create sense tract gene
         // 1 - express world into being's rhealm
         // 2 - express being's action into world's rhealm
-        internal.push(createInternalTractGene, createInternalImpressionsFromWorld, translateInternalActionToWorldAction);
+        internal.push(createInternalTractGene, createInternalImpressionsFromWorld, translateInternalActionToWorldAction, getMutatedTractGeneForSense);
         return internal;   
     }
 

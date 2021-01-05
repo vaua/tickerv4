@@ -44,7 +44,7 @@
                 if (this.inHighGrowthArea()) {
                     this.energy += 30;
                 } else {
-                    this.energy += 10;
+                    this.energy += 2;
                 }
             }
             this.age++;
@@ -74,7 +74,7 @@
     }
 
     Being.prototype.isDecomposed = function() {
-        return this.energy <= -(energyContent * this.genome.size * 5);
+        return this.energy <= -(energyContent * this.genome.size);
     }
 
     Being.prototype.isAnimal = function() {

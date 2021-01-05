@@ -373,5 +373,5 @@ function tickWorld(world, actions) {
 
     world.stats.animalActedUpon = {};
     if (world.stats.animalsAlive && world.running > 0) 
-        window.setTimeout(function() {tickWorld(world, presentWorldAndGetActions(world));}, 1);
+        window.setTimeout(function() {tickWorld(world, presentWorldAndGetActions(world));}, wait_between_ticks_to_avoid_overheating_ms);
 }
