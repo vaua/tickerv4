@@ -1,6 +1,6 @@
  // World
 const world_size = 1500;
-const energy_norm = 200;
+const energy_norm = 100;
 const target_beings = 1550;
 const do_reboots = true;
 const reboot_limit = 10;
@@ -22,7 +22,7 @@ const animalShapeBits = 3;
 const distanceBits = 3;
 const visionActionBits = 5;
 const affinityBits = 4;
-const maxTracts = [64, 12];
+const maxTracts = [32, 4];
 
 const animalSizeSpace = Math.pow(2, animalSizeBits);
 const animalTypeSpace = Math.pow(2, animalTypeBits);
