@@ -182,9 +182,6 @@ function presentWorldAndGetActions(world) {
                                 if (checkIfImpressionTriggersTrigger(impressions[i][0], trigger, sense)) {
                                     //console.log("YES YES YES => triggered a tract with affinity " + tract.affinity);
 
-                                    if (sense == 1 && trigger > 7) {
-                                        console.log("Got myself a smart parent.");
-                                    }
                                     if (chosenTract === undefined || (tract.affinity > chosenTract.affinity)) {
                                         
                                         //console.log("YES YES YES => this tract is winning!");

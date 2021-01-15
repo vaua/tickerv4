@@ -90,10 +90,12 @@ function renderWorld(world) {
             // Translate location l into x, y on circle r
             // 2pi / max * location = angle
             
+            ctx.fillStyle = "rgb(" + being.genome.size * 32 + ", " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
+
             if (being.isAnimal() && !being.isDead()) {
                 above ++;
                 b += 1;
-                ctx.fillStyle = "rgb(255, " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
+                
                 var angle = Math.PI * being.location * 2 / stats.worldSize;
                 var x = origo + Math.cos(angle) * (radius + b);
                 var y = origo + Math.sin(angle) * (radius + b);
@@ -118,7 +120,7 @@ function renderWorld(world) {
                 below ++;
                 o += 1;
                 if (o > radius) o = radius;
-                ctx.fillStyle = "rgb(0, " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
+                //ctx.fillStyle = "rgb(0, " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
                 var angle = Math.PI * being.location * 2 / stats.worldSize;
                 var x = origo + Math.cos(angle) * (radius - o);
                 var y = origo + Math.sin(angle) * (radius - o);
@@ -178,9 +180,9 @@ function renderWorld(world) {
     document.getElementById("animalMonitoredEnergy").innerHTML = stats.animalMonitored.energy;
     document.getElementById("animalMonitoredKidsSpawned").innerHTML = stats.animalMonitored.numberOfKids;
     document.getElementById("animalMonitoredConsecutiveEnergyIncreases").innerHTML = stats.animalMonitored.consecutiveEnergyIncreases;
-    document.getElementById("animalMonitoredSize").innerHTML = stats.animalMonitored.genome.size;
-    document.getElementById("animalMonitoredType").innerHTML = stats.animalMonitored.genome.type;
-    document.getElementById("animalMonitoredShape").innerHTML = stats.animalMonitored.genome.shape;
+    document.getElementById("animalMonitoredSize").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.size : "";
+    document.getElementById("animalMonitoredType").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.type : "";
+    document.getElementById("animalMonitoredShape").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.shape : "";
     document.getElementById("animalMonitoredLastImpressions").innerHTML = stats.animalMonitored.lastImpressions[0] + (stats.animalMonitored.lastImpressions[1] === undefined ? "" : ", " + stats.animalMonitored.lastImpressions[1].id);
     document.getElementById("animalMonitoredLastTrigger").innerHTML = stats.animalMonitored.lastTrigger;
     document.getElementById("animalMonitoredLastActions").innerHTML = actionsToText(stats.animalMonitored.lastActions);
@@ -195,6 +197,8 @@ function renderWorld(world) {
     document.getElementById("animalActedUponSize").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.size : "";
     document.getElementById("animalActedUponType").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.type : "";
     document.getElementById("animalActedUponShape").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.shape : "";
+    document.getElementById("animalActedUponAttacked").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.timesAttacked : "";
+    document.getElementById("animalActedUponEaten").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.timesEaten : "";
     //document.getElementById("animalActedUponLastImpressions").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.lastImpressions[0] + ", " + animalActedUpon.lastImpressions[1].id : "";
     //document.getElementById("animalActedUponLastTrigger").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.lastTrigger : "";
     //document.getElementById("animalActedUponLastActions").innerHTML = stats.animalActedUpon !== {} ? actionsToText(stats.animalActedUpon.lastActions) : "";

@@ -24,6 +24,9 @@
         this.maxEnergy = max_energy_coefficient * this.genome.size;
         this.initialMaxEnergy = this.maxEnergy;
         this.old_energy_dropoff_threshold = old_energy_coefficient * this.genome.size;
+        this.timesAttacked = 0;
+        this.timesEaten = 0;
+        this.energyClaimed = 0;
 
         // Set up afiinities for all tracts
         this.getSensesArray().forEach(sense => {
@@ -77,6 +80,10 @@
         return this.energy <= -(energyContent * this.genome.size);
     }
 
+    Being.prototype.energyLeftBeforeDecomposed = function() {
+        return (energyContent * this.genome.size) + this.energy;
+    }
+
     Being.prototype.isAnimal = function() {
         return this.genome.type > 1;
     }
@@ -107,6 +114,7 @@
     Being.prototype.checkForDeath = function() {
         if (this.energy <= 0 && !this.isDead()) {
             this.genome.tracts = [];
+            this.genome.shape -= animalShapeSpace / 2;
             this.dead = true;
             return true;
         } 

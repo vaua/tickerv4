@@ -25,7 +25,7 @@
         this.tracts = [];
 
         this.size = getRandomInt(animalSizeSpace);
-        this.shape = getRandomInt(animalShapeSpace);
+        this.shape = getRandomInt(animalShapeSpace / 2) + (animalShapeSpace / 2);
         this.type = getRandomInt(animalTypeSpace);
 
         // For each sense that this type of animal has

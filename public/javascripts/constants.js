@@ -22,7 +22,7 @@ const animalShapeBits = 3;
 const distanceBits = 3;
 const visionActionBits = 5;
 const affinityBits = 4;
-const maxTracts = [32, 4];
+const maxTracts = [32, 8];
 
 const animalSizeSpace = Math.pow(2, animalSizeBits);
 const animalTypeSpace = Math.pow(2, animalTypeBits);

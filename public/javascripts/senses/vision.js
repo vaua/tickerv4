@@ -201,11 +201,12 @@
                 // If presumptive food is dead, then consume it. The type will indicate the change of energy.
                 // If presumptive food is alive, you have attacked it. Calculate the energy reduction for it.
 
-                // Food are "animals" as well, with specific type and energy (and shape).
+                // Plants are beings as well, with specific type and energy (and shape).
                 // Initially, they will grow every cycle. But when eaten, they will dissapear.
 
-                // Animals that are killed must "look" different than animals that are alive.
+                // Beings that are killed must "look" different than animals that are alive.
                 // Shall their type be set to a low number (and plants are already a low number to begin with?)
+                // No - their shape shall change. Shape shall have one bit that tells if animal is dead!
 
                 // Idea - lower half of type are plants / dead aninals. Higer half are alive
                 // animals. when animals eat, their energy intake is proportional to how close food type
@@ -227,14 +228,22 @@
                 // be multiplying, but that can change later...
 
 
-                // Check if the food is alive
-                if (presumptiveFood.genome.type < Math.pow(2, animalTypeBits-1)) {
+                // Check if the food is plant or dead
+                if (!presumptiveFood.isAnimal() || presumptiveFood.genome.shape < Math.pow(2, animalShapeBits - 1)) {
                     // Dead animal or food, to be consumed
                     var energyUtilised = (animal.genome.size * 4) - Math.abs(animal.genome.type - presumptiveFood.genome.type - Math.pow(2, animalTypeBits-1));
 
                     // Question - should energy be adjusted different depending on the size of the animal? Probably!
 
                     // return world action that will add energy to animal and remove it from energyUtilised
+                    presumptiveFood.timesEaten ++;
+                    
+                    if (presumptiveFood.energyClaimed > presumptiveFood.energyLeftBeforeDecomposed()) {
+                        // No actions. The food is already claimed.
+                        return [];
+                    }
+                    
+                    presumptiveFood.energyClaimed += energyUtilised;
                     return [[1, [animal, energyUtilised]], [1, [presumptiveFood, -energyUtilised]]];
                 } else {
                     // Animal alive, we are fighting!
@@ -243,9 +252,11 @@
                     // Small animal with low energy will make least impact. Big animal with
                     // lots of energy will make the most impact.
 
+                    console.log("There was an attack!");
 
                     // This is ok for now, will add energy impact later.
                     var damage = Math.pow(2, animalSizeBits) + animal.genome.size - presumptiveFood.genome.size;
+                    presumptiveFood.timesAttacked ++;
                     return [1, [presumptiveFood, -damage]];
                 }
             }
