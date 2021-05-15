@@ -1,0 +1,362 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Mocha Tests</title>
+    <link rel="stylesheet" href="../node_modules/mocha/mocha.css">
+  </head>
+  <body>
+
+    <div id="mocha"></div>
+    <script src="../node_modules/mocha/mocha.js"></script>
+    <script src="../node_modules/chai/chai.js"></script>
+    <script>mocha.setup('bdd')</script>
+
+    <!-- load code you want to test here -->
+    <script src="../public/javascripts/host.js"></script>
+    <script src="../public/javascripts/world.js"></script>
+    <script src="../public/javascripts/being.js"></script>
+    <script src="../public/javascripts/genome.js"></script>
+    <script src="../public/javascripts/senses.js"></script>
+    <script src="../public/javascripts/actions.js"></script>
+    <script src="../public/javascripts/constants.js"></script>
+    <script src="../public/javascripts/senses/vision.js"></script>
+    <script src="../public/javascripts/senses/internal.js"></script>
+    <!-- load your test files here -->
+
+    <script src="world.js"></script>
+    <script>
+
+    </script>
+
+<div class="status"><h3 id="status">Status: </h3></div>
+<div>
+    <h2>
+        <span style="background-color: #000000; color: #ffffff">___Dead small plant___</span>
+        <span style="background-color: #800000">___Dead midsized plant___</span>
+        <span style="background-color: #FF0000">___Dead large plant___</span>
+        <br>
+        <span style="background-color: #006000">___Dead small animal___</span>
+        <span style="background-color: #806000">___Dead midsized animal___</span>
+        <span style="background-color: #FF6000">___Dead large animal___</span>
+        <br>
+        <span style="background-color: #0000D0">___Alive small plant___</span>
+        <span style="background-color: #8000D0">___Alive midsized plant___</span>
+        <span style="background-color: #FF00D0">___Alive large plant___</span>
+        <br>
+        <span style="background-color: #0060D0">___Alive small animal___</span>
+        <span style="background-color: #8060D0">___Alive midsized animal___</span>
+        <span style="background-color: #FF60D0">___Alive large animal___</span>
+    </h3>   
+</div>
+
+<div>
+    
+    <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
+
+
+
+    <div class="stats">
+        <h3>World Statistics</h3>
+        <table id="worldTable">
+            <tr>
+                <th>Item</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>World Tick</td>
+                <td id="tickNr"></td>
+            </tr>
+            <tr style="border-bottom: 1px solid black;">
+                <td colspan="100%">________________________________________</td>
+            </tr>
+            <tr>
+                <td>Beings Alive</td>
+                <td id="beingsAlive"></td>
+            </tr>
+            <tr>
+                <td>Animals Alive</td>
+                <td id="animalsAlive"></td>
+            </tr>
+            <tr>
+                <td>Plants Alive</td>
+                <td id="plantsAlive"></td>
+            </tr>
+            <tr style="border-bottom: 1px solid black;">
+                <td colspan="100%">________________________________________</td>
+            </tr>
+            <tr>
+                <td>Beings Created</td>
+                <td id="beingsCreated"></td>
+            </tr>
+            
+            <tr>
+                <td>Animals Created</td>
+                <td id="animalsCreated"></td>
+            </tr>
+            <tr>
+                <td>Plants Created</td>
+                <td id="plantsCreated"></td>
+            </tr>
+            <tr style="border-bottom: 1px solid black;">
+                <td colspan="100%">________________________________________</td>
+            </tr>
+            <tr>
+                <td>Beings Dead</td>
+                <td id="beingsDead"></td>
+            </tr>
+            <tr>
+                <td>Beings Removed</td>
+                <td id="beingsRemoved"></td>
+            </tr>
+            <tr style="border-bottom: 1px solid black;">
+                <td colspan="100%">________________________________________</td>
+            </tr>
+            <tr>
+                <td>Total births given</td>
+                <td id="birthsGiven"></td>
+            </tr>
+            <br>
+            <tr>
+                <td>Average Animal Age</td>
+                <td id="averageAnimalAge"></td>
+            </tr>
+            <tr>
+                <td>Average Dead Animal Age</td>
+                <td id="averageDeadAnimalAge"></td>
+            </tr>
+            <tr>
+                <td>Animals Dead this tick</td>
+                <td id="animalsDeadThisTick"></td>
+            </tr>
+            <tr>
+                <td>Oldest Living Animal</td>
+                <td id="oldestLivingAnimal"></td>
+            </tr>
+            <tr style="border-bottom: 1px solid black;">
+                <td colspan="100%">________________________________________</td>
+            </tr>
+            <tr>
+                <td>Beings processed last turn</td>
+                <td id="beingsProcessed"></td>
+            </tr>
+            <tr>
+                <td>Total location changes</td>
+                <td id="locationChanged"></td>
+            </tr>
+            <tr>
+                <td>Total energy changes</td>
+                <td id="energyChanged"></td>
+            </tr>
+            <tr>
+                <td>Total affinity changed</td>
+                <td id="affinityChanged"></td>
+            </tr>
+            <tr>
+                <td>Vision Impressions Checked</td>
+                <td id="visionImpressionsChecked"></td>
+            </tr>
+            <tr>
+                <td>Triggers generated by Vision</td>
+                <td id="visionTriggersGenerated"></td>
+            </tr>
+            <tr>
+                <td>% of animals that vision triggered</td>
+                <td id="visionTriggeredPerAnimal"></td>
+            </tr>
+           <tr>
+                <td>Actions last tick</td>
+                <td id="actionsLastTick"></td>
+            </tr>
+
+            <tr>
+                <td>Last tick duration</td>
+                <td id="tickDuration"></td>
+            </tr>
+            <tr>
+                <td>Execution duration</td>
+                <td id="executionDuration"></td>
+            </tr>
+            <tr>
+                <td>Ticks per second</td>
+                <td id="tickedPerSecond"></td>
+            </tr>
+            <tr>
+                <td>Image update time</td>
+                <td id="imageUpdateTime"></td>
+            </tr>
+
+            <tr>
+                <td>World reboots</td>
+                <td id="reboots"></td>
+            </tr>
+
+
+            <tr>
+                <td>Above</td>
+                <td id="above"></td>
+            </tr>
+            <tr>
+                <td>Below</td>
+                <td id="below"></td>
+            </tr>
+
+        </table>
+    </div>
+
+    <div class="stats">
+        <h3>Animal to follow:</h3>
+        <input type="radio" id="age" name="animal" value="age" onclick="onRadioClick(this);" checked="checked">
+        <label for="age">Highest age</label><br>
+        <input type="radio" id="highEnergy" name="animal" onclick="onRadioClick(this);" value="highEnergy">
+        <label for="highEnergy">Highest Energy</label><br>
+        <input type="radio" id="increasedEnergy" name="animal" onclick="onRadioClick(this);" value="increasedEnergy">
+        <label for="increasedEnergy">Consecutive Energy Increase</label><br>
+        <input type="radio" id="mostKids" name="animal" onclick="onRadioClick(this);" value="mostKids">
+        <label for="mostKids">Most Kids Spawned</label><br>
+        
+        <h3>Followed Animal Statistics</h3>
+        <table id="animalTable">
+            <tr>
+                <th>Item</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Animal Id Of Animal With Age</td>
+                <td id="animalMonitoredId"></td>
+            </tr>
+            <tr>
+                <td>Animal Age</td>
+                <td id="animalMonitoredAge"></td>
+            </tr>
+            <tr>
+                <td>Animal Location</td>
+                <td id="animalMonitoredLocation"></td>
+            </tr>
+            <tr>
+                <td>Animal Energy</td>
+                <td id="animalMonitoredEnergy"></td>
+            </tr>
+            <tr>
+                <td>Animal Kids Spawned</td>
+                <td id="animalMonitoredKidsSpawned"></td>
+            </tr>
+            <tr>
+                <td>Animal Consecutive Energy</td>
+                <td id="animalMonitoredConsecutiveEnergyIncreases"></td>
+            </tr>
+            <tr>
+                <td>Animal Size</td>
+                <td id="animalMonitoredSize"></td>
+            </tr>
+            <tr>
+                <td>Animal Type</td>
+                <td id="animalMonitoredType"></td>
+            </tr>
+            <tr>
+                <td>Animal Shape</td>
+                <td id="animalMonitoredShape"></td>
+            </tr>
+
+            <tr>
+                <td>Last Active Visual Impression</td>
+                <td id="animalMonitoredLastImpressions"></td>
+            </tr>
+
+            <tr>
+                <td>Last Active Visual Trigger</td>
+                <td id="animalMonitoredLastTrigger"></td>
+            </tr>
+
+            <tr>
+                <td>Last Actions</td>
+            </tr>
+            </tr>
+                <td style="white-space:pre-wrap" id="animalMonitoredLastActions"></td>
+            </tr>
+
+
+        </table>
+    </div>
+
+    <div class="stats">
+        <h3>Animal acted upon:</h3>
+        <table id="animalTable">
+            <tr>
+                <th>Item</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Animal Id Of Animal With Age</td>
+                <td id="animalActedUponId"></td>
+            </tr>
+            <tr>
+                <td>Animal Age</td>
+                <td id="animalActedUponAge"></td>
+            </tr>
+            <tr>
+                <td>Animal Location</td>
+                <td id="animalActedUponLocation"></td>
+            </tr>
+            <tr>
+                <td>Animal Energy</td>
+                <td id="animalActedUponEnergy"></td>
+            </tr>
+            <tr>
+                <td>Animal Kids Spawned</td>
+                <td id="animalActedUponKidsSpawned"></td>
+            </tr>
+            <tr>
+                <td>Animal Consecutive Energy</td>
+                <td id="animalActedUponConsecutiveEnergyIncreases"></td>
+            </tr>
+            <tr>
+                <td>Animal Size</td>
+                <td id="animalActedUponSize"></td>
+            </tr>
+            <tr>
+                <td>Animal Type</td>
+                <td id="animalActedUponType"></td>
+            </tr>
+            <tr>
+                <td>Animal Shape</td>
+                <td id="animalActedUponShape"></td>
+            </tr>
+            <tr>
+                <td>Attacked times</td>
+                <td id="animalActedUponAttacked"></td>
+            </tr>
+            <tr>
+                <td>Eaten times</td>
+                <td id="animalActedUponEaten"></td>
+            </tr>
+
+            <!--tr>
+                <td>Last Active Visual Impression</td>
+                <td id="animalActedUponLastImpressions"></td>
+            </tr>
+
+            <tr>
+                <td>Last Active Visual Trigger</td>
+                <td id="animalActedUponLastTrigger"></td>
+            </tr>
+
+            <tr>
+                <td>Last Actions</td>
+            </tr>
+            </tr>
+                <td style="white-space:pre-wrap" id="animalActedUponLastActions"></td>
+            </tr-->
+
+
+        </table>
+    </div>
+
+
+    </div>
+</div>
+
+    <script>
+      mocha.run();
+    </script>
+  </body>
+</html>

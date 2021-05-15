@@ -20,6 +20,25 @@
     <button type="button" onclick="executeOneTick();">Step</button>
     <button type="button" onclick="startWorld();">Reset</button>
     <div class="status"><h3 id="status">Status: </h3></div>
+    <div>
+        <h2>
+            <span style="background-color: #000000; color: #ffffff">___Dead small plant___</span>
+            <span style="background-color: #800000">___Dead midsized plant___</span>
+            <span style="background-color: #FF0000">___Dead large plant___</span>
+            <br>
+            <span style="background-color: #006000">___Dead small animal___</span>
+            <span style="background-color: #806000">___Dead midsized animal___</span>
+            <span style="background-color: #FF6000">___Dead large animal___</span>
+            <br>
+            <span style="background-color: #0000D0">___Alive small plant___</span>
+            <span style="background-color: #8000D0">___Alive midsized plant___</span>
+            <span style="background-color: #FF00D0">___Alive large plant___</span>
+            <br>
+            <span style="background-color: #0060D0">___Alive small animal___</span>
+            <span style="background-color: #8060D0">___Alive midsized animal___</span>
+            <span style="background-color: #FF60D0">___Alive large animal___</span>
+        </h3>   
+    </div>
 
     <div>
         
@@ -38,18 +57,39 @@
                     <td>World Tick</td>
                     <td id="tickNr"></td>
                 </tr>
-
-                <tr style="border-bottom:4px solid black">
-                    <td colspan="100%"> </td>
+                <tr style="border-bottom: 1px solid black;">
+                    <td colspan="100%">________________________________________</td>
                 </tr>
-
                 <tr>
                     <td>Beings Alive</td>
                     <td id="beingsAlive"></td>
                 </tr>
                 <tr>
+                    <td>Animals Alive</td>
+                    <td id="animalsAlive"></td>
+                </tr>
+                <tr>
+                    <td>Plants Alive</td>
+                    <td id="plantsAlive"></td>
+                </tr>
+                <tr style="border-bottom: 1px solid black;">
+                    <td colspan="100%">________________________________________</td>
+                </tr>
+                <tr>
                     <td>Beings Created</td>
                     <td id="beingsCreated"></td>
+                </tr>
+                
+                <tr>
+                    <td>Animals Created</td>
+                    <td id="animalsCreated"></td>
+                </tr>
+                <tr>
+                    <td>Plants Created</td>
+                    <td id="plantsCreated"></td>
+                </tr>
+                <tr style="border-bottom: 1px solid black;">
+                    <td colspan="100%">________________________________________</td>
                 </tr>
                 <tr>
                     <td>Beings Dead</td>
@@ -59,32 +99,14 @@
                     <td>Beings Removed</td>
                     <td id="beingsRemoved"></td>
                 </tr>
-                <tr>
-                    <td>Beings processed last turn</td>
-                    <td id="beingsProcessed"></td>
+                <tr style="border-bottom: 1px solid black;">
+                    <td colspan="100%">________________________________________</td>
                 </tr>
-                <br>
                 <tr>
                     <td>Total births given</td>
                     <td id="birthsGiven"></td>
                 </tr>
-                <tr>
-                    <td>Animals Created</td>
-                    <td id="animalsCreated"></td>
-                </tr>
-                <tr>
-                    <td>Animals Alive</td>
-                    <td id="animalsAlive"></td>
-                </tr>
-                <tr>
-                    <td>Plants Created</td>
-                    <td id="plantsCreated"></td>
-                </tr>
-                <tr>
-                    <td>Plants Alive</td>
-                    <td id="plantsAlive"></td>
-                </tr>
-
+                <br>
                 <tr>
                     <td>Average Animal Age</td>
                     <td id="averageAnimalAge"></td>
@@ -101,7 +123,13 @@
                     <td>Oldest Living Animal</td>
                     <td id="oldestLivingAnimal"></td>
                 </tr>
-
+                <tr style="border-bottom: 1px solid black;">
+                    <td colspan="100%">________________________________________</td>
+                </tr>
+                <tr>
+                    <td>Beings processed last turn</td>
+                    <td id="beingsProcessed"></td>
+                </tr>
                 <tr>
                     <td>Total location changes</td>
                     <td id="locationChanged"></td>
@@ -114,27 +142,19 @@
                     <td>Total affinity changed</td>
                     <td id="affinityChanged"></td>
                 </tr>
-
                 <tr>
                     <td>Vision Impressions Checked</td>
                     <td id="visionImpressionsChecked"></td>
                 </tr>
-                
                 <tr>
                     <td>Triggers generated by Vision</td>
                     <td id="visionTriggersGenerated"></td>
                 </tr>
-                
                 <tr>
                     <td>% of animals that vision triggered</td>
                     <td id="visionTriggeredPerAnimal"></td>
                 </tr>
-                
-                <tr style="border-bottom:4px solid black">
-                    <td colspan="100%"></td>
-                </tr>
-
-                <tr>
+               <tr>
                     <td>Actions last tick</td>
                     <td id="actionsLastTick"></td>
                 </tr>

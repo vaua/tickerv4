@@ -8,6 +8,13 @@
 function startWorld() {
     document.getElementById("status").innerHTML = "Status: Creating world."
     window.world = new World();
+
+    // Populate world
+    for (var i = 0; i < window.world.target_beings; i++) {
+        window.world.createNewRandomAnimal();
+    }
+    console.log("World created.");
+    
     document.getElementById("status").innerHTML = "Status: World created."
 }
 
@@ -183,9 +190,9 @@ function renderWorld(world) {
     document.getElementById("animalMonitoredSize").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.size : "";
     document.getElementById("animalMonitoredType").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.type : "";
     document.getElementById("animalMonitoredShape").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.shape : "";
-    document.getElementById("animalMonitoredLastImpressions").innerHTML = stats.animalMonitored.lastImpressions[0] + (stats.animalMonitored.lastImpressions[1] === undefined ? "" : ", " + stats.animalMonitored.lastImpressions[1].id);
+    document.getElementById("animalMonitoredLastImpressions").innerHTML = stats.animalMonitored.lastImpressions != undefined ? stats.animalMonitored.lastImpressions[0] + (stats.animalMonitored.lastImpressions[1] === undefined ? "" : ", " + stats.animalMonitored.lastImpressions[1].id) : "";
     document.getElementById("animalMonitoredLastTrigger").innerHTML = stats.animalMonitored.lastTrigger;
-    document.getElementById("animalMonitoredLastActions").innerHTML = actionsToText(stats.animalMonitored.lastActions);
+    document.getElementById("animalMonitoredLastActions").innerHTML = stats.animalMonitored.lastActions != undefined ? actionsToText(stats.animalMonitored.lastActions) : "";
 
     // Animal acted upon stats
     document.getElementById("animalActedUponId").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.id : "";

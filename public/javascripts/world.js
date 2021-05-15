@@ -37,10 +37,6 @@
         // Setup world
         window.Action.initiateWorldActions(this);
 
-        // create Initial creatures
-        for (var i = 0; i < this.target_beings; i++) {
-            this.createNewRandomAnimal();
-        }
         console.log("World created.");
     }
 
