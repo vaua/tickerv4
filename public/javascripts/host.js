@@ -23,7 +23,7 @@ function togglePauseWorld() {
     window.world.running = !window.world.running;
 
     if (window.world.running === true) {
-        tickWorld(window.world, presentWorldAndGetActions(window.world));
+        window.world.tick(window.world.presentWorldAndGetActions());
     }
 }
 
@@ -31,7 +31,7 @@ function executeOneTick() {
     if (!window.world.running) {
         document.getElementById("status").innerHTML = "Status: executing one step.";
 
-        tickWorld(window.world, presentWorldAndGetActions(window.world));
+        window.world.tick(window.world.presentWorldAndGetActions());
         document.getElementById("status").innerHTML = "Status: World paused.";
     }
 }
