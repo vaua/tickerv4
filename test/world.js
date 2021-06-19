@@ -41,6 +41,32 @@ describe("World", function() {
 
             chai.expect(w1.stats.beingsAlive).to.lessThanOrEqual(1000);
         });
+
+        it("Creates one specific animal and run it for several ticks", function() {
+            var w1 = new World();    
+            chai.expect(w1.stats.beingsAlive).to.equal(0);
+
+            // Create a specific animal, that will move to the right if there is an specific animal to its left
+            var g = new Genome(true);
+            g.size = 1;
+            g.shape = 5;
+            g.type = 4;
+
+            //Create tracts for one sense - vision
+            var tract =  [];
+            tract.push
+
+            g.tracts[0] = [];
+
+
+
+
+            w1.createNewRandomAnimal();
+            chai.expect(w1.stats.beingsAlive).to.equal(1);
+
+            
+        });
+
          
        });
   });
