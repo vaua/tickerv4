@@ -28,7 +28,7 @@
         this.timesEaten = 0;
         this.energyClaimed = 0;
 
-        // Set up afiinities for all tracts
+        // Set up afinities for all tracts
         this.getSensesArray().forEach(sense => {
             this.affinities[sense] = [];
             for (var i = 0; i < this.genome.tracts[sense].length; i++) {

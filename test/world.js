@@ -47,22 +47,32 @@ describe("World", function() {
             chai.expect(w1.stats.beingsAlive).to.equal(0);
 
             // Create a specific animal, that will move to the right if there is an specific animal to its left
-            var g = new Genome(true);
-            g.size = 1;
-            g.shape = 5;
-            g.type = 4;
+            var genome = new Genome(true);
+            genome.size = 1;
+            genome.shape = 5;
+            genome.type = 4;
+            genome.tracts = [];
+            genome.tracts[0] = [];
+            genome.tracts[1] = [];
 
             //Create tracts for one sense - vision
-            var tract =  [];
-            tract.push
+            var reactToOne =  {};
+          
+            // Level 1 triggers on 1. Will trigger action 1 with affinity 5.
+            reactToOne.trigger = [1, 0, 0];
+            reactToOne.action = 0;
+            reactToOne.affinity = 5;
+            
 
-            g.tracts[0] = [];
+            genome.tracts[0].push(reactToOne);
 
-
-
-
-            w1.createNewRandomAnimal();
+            var animal = new Being(0, 100, genome, 0);
+            w1.createSpecificBeing(0, animal);
+            
+            
             chai.expect(w1.stats.beingsAlive).to.equal(1);
+
+
 
             
         });

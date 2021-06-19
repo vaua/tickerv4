@@ -46,17 +46,26 @@
         var genome = new Genome();
         var init_energy = getRandomInt(energy_norm) * (genome.size + 1);
         var being = new Being(this.stats.beingsCreated++, init_energy, genome, this.stats.beingsCreated % 2);
-        if (being.genome.type > 1) {
-            this.stats.beingsAlive++;
-            this.stats.animalsCreated++;
-            this.stats.animalsAlive++;
-        } else {
-            this.stats.beingsAlive++;
-            this.stats.plantsCreated++;
-            this.stats.plantsAlive++;
-        }
+        
+        updateStatsBeingCreated(this, being);
         this.addToLocation(getRandomLocation(), being);
+    }
 
+    World.prototype.createSpecificBeing = function (being, location) {
+        updateStatsBeingCreated(this, being);
+        this.addToLocation(location, being);
+    }
+
+    function updateStatsBeingCreated(world, being) {
+        if (being.genome.type > 1) {
+            world.stats.beingsAlive++;
+            world.stats.animalsCreated++;
+            world.stats.animalsAlive++;
+        } else {
+            world.stats.beingsAlive++;
+            world.stats.plantsCreated++;
+            world.stats.plantsAlive++;
+        }
     }
 
     World.prototype.addToLocation = function (location, being) {
