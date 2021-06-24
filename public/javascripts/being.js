@@ -81,7 +81,7 @@
     }
 
     Being.prototype.energyLeftBeforeDecomposed = function() {
-        return (energyContent * this.genome.size) + this.energy;
+        return (energyContent * this.genome.size);
     }
 
     Being.prototype.isAnimal = function() {

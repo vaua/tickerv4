@@ -22,6 +22,7 @@
         this.stats.plantsAlive = 0;
         this.stats.worldSize = world_size;
         this.stats.animalTypeMonitored = "age";
+        this.stats.animalColorScheme = "sitysha";
         this.running = false;
         this.stats.reboots = 0;
 

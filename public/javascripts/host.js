@@ -41,7 +41,10 @@ function onRadioClick(radio) {
     console.log("Changed to: " + radio.value);
 }
 
-
+function onColorClick(radio) {
+    window.world.stats.animalColorSheme = radio.value;
+    console.log("Changed to: " + radio.value);
+}
 
 
 
@@ -97,9 +100,38 @@ function renderWorld(world) {
             // Translate location l into x, y on circle r
             // 2pi / max * location = angle
             
-            ctx.fillStyle = "rgb(" + being.genome.size * 32 + ", " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
+            // apply color coding scheme
+            switch(stats.animalColorSheme) {
+                case "sitysha":
+                    ctx.fillStyle = "rgb(" + being.genome.size * 32 + ", " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
+                    break;
+                case "age":
+                    ctx.fillStyle = "rgb(" + Math.floor((being.age * 256) / stats.longestLivingAnimal.age) + ", 60, 30)";
+                    break;
+                case "energy":
+                    ctx.fillStyle = "rgb(" + Math.floor((being.energy * 256) / stats.highestEnergyAnimal.energy) + ", 120, 90)";
+                    break;
+                case "stape":
+                    // Status - animal, plant, living, dead`plus shape as second - third param.
+                    var red = 255;
+                    var green = 0;
+                    if (!being.isAnimal()) {
+                        red = 0;
+                        green = 255;
+                    }
+                    
+                    ctx.fillStyle = "rgb(" + red + ", " + green + ", " + (being.genome.shape * 8) + ")";
+                    break;
+                case "mostKids":
+                    ctx.fillStyle = "rgb(" + Math.floor((being.numberOfKids * 256) / stats.mostKidsAnimal.numberOfKids) + ", 0, 30)";
+                    break;
+                default:
+                    console.log("Some weird shit happened with color.");
+                    ctx.fillStyle = "rgb(" + being.genome.size * 32 + ", " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
+                    break;
+            }
 
-            if (being.isAnimal() && !being.isDead()) {
+            if (!being.isDead()) {
                 above ++;
                 b += 1;
                 
