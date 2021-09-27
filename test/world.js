@@ -285,6 +285,7 @@ describe("World", function() {
 
             // NOw that animal is dead, energy utilised will be 6 + 1 generic loss = decrease of 7.
             chai.expect(w1.locations[2][0].energy).equal(-3);
+            chai.expect(w1.locations[2][0].bodyEnergy).equal(25);
 
 
             chai.expect(w1.locations[0][0].energy).equal(82);
@@ -306,7 +307,9 @@ describe("World", function() {
 
             chai.expect(w1.locations[2][0].isDead()).true;
 
-            chai.expect(w1.locations[2][0].energy).equal(-10);
+            chai.expect(w1.locations[2][0].energy).equal(-3);
+            chai.expect(w1.locations[2][0].bodyEnergy).equal(18);
+
             chai.expect(w1.locations[0][0].energy).equal(85);
             chai.expect(w1.locations[1][0].energy).equal(82);
 
@@ -321,7 +324,9 @@ describe("World", function() {
             w1.tick(actions);
 
             chai.expect(w1.locations[2][0].isDead()).true;
-            chai.expect(w1.locations[2][0].energy).equal(-17);
+            chai.expect(w1.locations[2][0].energy).equal(-3);
+            chai.expect(w1.locations[2][0].bodyEnergy).equal(11);
+
 
             chai.expect(w1.locations[0][0].energy).equal(88);
             chai.expect(w1.locations[1][0].energy).equal(79);
@@ -337,13 +342,90 @@ describe("World", function() {
             w1.tick(actions);
 
             chai.expect(w1.locations[2][0].isDead()).true;
-            chai.expect(w1.locations[2][0].energy).equal(-24);
+            chai.expect(w1.locations[2][0].energy).equal(-3);
+            chai.expect(w1.locations[2][0].bodyEnergy).equal(4);
+
 
             chai.expect(w1.locations[0][0].energy).equal(91);
             chai.expect(w1.locations[1][0].energy).equal(76);
 
+            console.log("Executing eleventh tick.");
+            var actions = w1.presentWorldAndGetActions();
+
+            var flatActions = actions.flat().filter(function(el) {
+                return (el != null && el.length > 0);
+            });
+
+            chai.expect(flatActions.length).to.equal(1);
+            w1.tick(actions);
+
+            chai.expect(w1.locations[2].length).equal(0);
+
+            chai.expect(w1.locations[0][0].energy).equal(92);
+            chai.expect(w1.locations[1][0].energy).equal(73);
+
 
         });
 
-         
+        it("Creates one plant eating animal and tests that", function() {
+            var w1 = new World();    
+            chai.expect(w1.stats.beingsAlive).to.equal(0);
+
+            // First create a plant
+            console.log("Creating plant.");
+
+            var p1g = new Genome(true);
+            p1g.size = 6;
+            p1g.shape = 5;
+            p1g.type = 0;
+            p1g.tracts = [];
+            p1g.tracts[0] = [];
+            p1g.tracts[1] = [];
+
+            var startEnergy = 100;
+            var p1 = new Being(0, startEnergy, p1g, 0);
+            p1.bodyEnergy = 15;
+            w1.createSpecificBeing(p1, 10);
+            
+            chai.expect(w1.stats.beingsAlive).to.equal(1);
+
+            //Now create a plant eating animal.
+            var a1g = new Genome(true);
+            a1g.size = 2;
+            a1g.shape = 7;
+            a1g.type = 2;
+            a1g.tracts = [];
+            a1g.tracts[0] = [];
+            a1g.tracts[1] = [];
+
+            //Create tracts for one sense - vision
+            var a1t1 =  {};
+          
+            // Level 1 triggers on 1. Will trigger action 1 with affinity 5.
+            a1t1.trigger = [11, 0, 0];
+            a1t1.action = 19;
+            a1t1.affinity = 5;
+            
+
+            a1g.tracts[0].push(a1t1);
+
+            var a1 = new Being(1, startEnergy, a1g, 1);
+            w1.createSpecificBeing(a1, 9);
+
+            // Now execute
+            console.log("Tick 1");
+            var actions = w1.presentWorldAndGetActions();
+
+            var flatActions = actions.flat().filter(function(el) {
+                return (el != null && el.length > 0);
+            });
+
+            chai.expect(flatActions.length).to.equal(1);
+            w1.tick(actions);
+
+            chai.expect(w1.locations[10][0].energy).equal(94);
+            chai.expect(w1.locations[9][0].energy).equal(103);
+
+        });
+        
     });

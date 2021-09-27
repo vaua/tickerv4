@@ -1,11 +1,11 @@
  // World
 const world_size = 1500;
 const energy_norm = 100;
-const target_beings = 1550;
+const target_beings = 5500;
 const do_reboots = false;
 const reboot_limit = 10;
-const max_beings_per_location = 30;
-const general_mutation_severity = 15;
+const max_beings_per_location = 900;
+const general_mutation_severity = 35;
 const wait_between_ticks_to_avoid_overheating_ms = 10;
 
 const high_growth_areas_number = 5;

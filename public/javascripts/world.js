@@ -262,6 +262,7 @@
                 // Remove the cost of the energy for animals that are alive and not plants
                 // Alive: energy > 0. Not plant: Type > first quarter.
                 being.tick();
+                being.bodyEnergyClaimed = 0; // Zero out the variable.
 
                 // Check if being is dead
                 if (being.checkForDeath()) {

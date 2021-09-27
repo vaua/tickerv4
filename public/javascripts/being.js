@@ -26,7 +26,10 @@
         this.old_energy_dropoff_threshold = old_energy_coefficient * this.genome.size;
         this.timesAttacked = 0;
         this.timesEaten = 0;
-        this.energyClaimed = 0;
+        this.bodyEnergyClaimed = 0;
+        this.bodyEnergy = 0;
+        this.maxBodyEnergy = this.genome.size * energyContent;
+
 
         // Set up afinities for all tracts
         this.getSensesArray().forEach(sense => {
@@ -42,18 +45,27 @@
         if (!this.isDead()) {
             // for living creatures, decrease energy based on size
             if (this.isAnimal()) {
-                this.energy -= energyLoss * (this.genome.size + 1);
+                var energyChange = energyLoss * (this.genome.size + 1);
+                this.energy -= energyChange;
+                if (this.bodyEnergy < this.maxBodyEnergy) this.bodyEnergy += energyChange;
+                if (this.bodyEnergy > this.maxBodyEnergy) this.bodyEnergy = this.maxBodyEnergy;
+
+                 // Diminish max energy due to old age
+                if (this.age > this.old_energy_dropoff_threshold) {
+                    this.maxEnergy--;
+                }
+
             } else {
                 if (this.inHighGrowthArea()) {
-                    this.energy += 30;
+                    this.bodyEnergy += 30;
                 } else {
-                    this.energy += 2;
+                    this.bodyEnergy += 9;
                 }
             }
             this.age++;
         } else {
             // for dead beings, just ordinary decay...
-            this.energy -= energyLoss;
+            this.bodyEnergy -= energyLoss;
         }
 
         // Check if more energy than before
@@ -63,10 +75,7 @@
             this.consecutiveEnergyIncreases = 0;
         }
 
-        // Diminish max energy due to old age
-        if (this.age > this.old_energy_dropoff_threshold) {
-            this.maxEnergy--;
-        }
+       
 
         // Chop it off to max if over max
         if (this.energy > this.maxEnergy) {
@@ -77,11 +86,11 @@
     }
 
     Being.prototype.isDecomposed = function() {
-        return this.energy <= -(energyContent * this.genome.size);
+        return this.bodyEnergy < 0;
     }
 
-    Being.prototype.energyLeftBeforeDecomposed = function() {
-        return (energyContent * this.genome.size);
+    Being.prototype.energyLeftToBeClaimed = function() {
+        return this.bodyEnergy - this.bodyEnergyClaimed;
     }
 
     Being.prototype.isAnimal = function() {
@@ -98,6 +107,14 @@
 
     Being.prototype.getNumberOfSenses = function() {
         return this.genome.tracts.length;
+    }
+
+    Being.prototype.adjustEnergy = function(delta) {
+        if (this.isDead()) {
+            this.bodyEnergy += delta;
+        } else {
+            this.energy += delta;
+        }
     }
 
     Being.prototype.getNumberOfTracts = function() {

@@ -231,19 +231,24 @@
                 // Check if the food is plant or dead
                 if (!presumptiveFood.isAnimal() || presumptiveFood.genome.shape < Math.pow(2, animalShapeBits - 1)) {
                     // Dead animal or food, to be consumed
+                    // This is amount of energy we can gobble
                     var energyUtilised = (animal.genome.size * 4) - Math.abs(animal.genome.type - presumptiveFood.genome.type - Math.pow(2, animalTypeBits-1));
 
-                    // Question - should energy be adjusted different depending on the size of the animal? Probably!
+                    if (energyUtilised > presumptiveFood.energyLeftToBeClaimed()) {
+                        // There is no enough energy left for us to clame it all
+                        if (presumptiveFood.energyLeftToBeClaimed() > 0) {
+                            // What is left is less than what we want, we take all.
+                            energyUtilised = presumptiveFood.energyLeftToBeClaimed();
+                        } else {
+                            // Nothing left. No actions.
+                            return [];
+                        }
+                    }
 
                     // return world action that will add energy to animal and remove it from energyUtilised
+                    presumptiveFood.bodyEnergyClaimed += energyUtilised;
                     presumptiveFood.timesEaten ++;
-                    
-                    if (presumptiveFood.energyClaimed > presumptiveFood.energyLeftBeforeDecomposed()) {
-                        // No actions. The food is already claimed.
-                        return [];
-                    }
-                    
-                    presumptiveFood.energyClaimed += energyUtilised;
+                                        
                     return [[1, [animal, energyUtilised]], [1, [presumptiveFood, -energyUtilised]]];
                 } else {
                     // Animal alive, we are fighting!

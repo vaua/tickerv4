@@ -61,7 +61,7 @@
             var being = params[0];
             var energyDelta = params[1];
 
-            being.energy += energyDelta;
+            being.adjustEnergy(energyDelta);
             world.stats.energyChanged++;
         }
 
