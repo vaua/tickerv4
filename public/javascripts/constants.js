@@ -1,17 +1,20 @@
  // World
 const world_size = 1500;
-const energy_norm = 100;
+const energy_norm = 200;
 const target_beings = 5500;
 const do_reboots = false;
-const reboot_limit = 10;
+const reboot_limit = 150;
 const max_beings_per_location = 900;
 const general_mutation_severity = 35;
 const wait_between_ticks_to_avoid_overheating_ms = 10;
 
 const high_growth_areas_number = 5;
 const high_growth_areas_size = 20;
-const high_growth_areas = [...Array(high_growth_areas_number).keys()].map(function(id) {return Math.floor(world_size / id) - 100 + getRandomInt(200)});
- // Animal
+//const high_growth_areas = [...Array(high_growth_areas_number).keys()].map(function(id) {return Math.floor(world_size / (id + 1)) - 100 + getRandomInt(200)});
+
+const high_growth_areas = [0, 100, 200, 300, 400]
+
+// Animal
 
  const max_energy_coefficient = 400;
  const old_energy_coefficient = 500;

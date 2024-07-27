@@ -46,6 +46,18 @@ function onColorClick(radio) {
     console.log("Changed to: " + radio.value);
 }
 
+function setQueriedAnimal(query) {
+    window.world.stats.queriedAnimal = parseInt(query, 10);
+    console.log("Query: " + query);
+    var radiobtn = document.getElementById("specific");
+    console.log("Radio Button: ", radiobtn)
+    radiobtn.checked = true;
+    console.log("Radio Button: ", radiobtn)
+    window.world.stats.animalTypeMonitored = radiobtn.value;
+    console.log("Changed to: " + radiobtn.value);
+
+
+}
 
 
 
@@ -61,7 +73,7 @@ function renderWorld(world) {
     var below = 0;
     var animalMonitored = {};
 
-    console.log("Updating image.");
+    //console.log("Updating image.");
     stats.imageUpdateTimeStart = Date.now();
 
     
@@ -84,8 +96,14 @@ function renderWorld(world) {
         case "mostKids":
             stats.animalMonitored = stats.mostKidsAnimal;
             break;
+        case "longestLineage":
+            stats.animalMonitored = stats.longestLineageAnimal;
+            break;
+        case "specific":
+            stats.animalMonitored = stats.specificAnimal;
+            break;
         default:
-            console.log("Failed to find appropriate type of animal.");
+            console.log("Failed to find appropriate type of animal, ", stats.animalTypeMonitored);
             break;
     }
 
@@ -126,7 +144,7 @@ function renderWorld(world) {
                     ctx.fillStyle = "rgb(" + Math.floor((being.numberOfKids * 256) / stats.mostKidsAnimal.numberOfKids) + ", 0, 30)";
                     break;
                 default:
-                    console.log("Some weird shit happened with color.");
+                    //console.log("Some weird shit happened with color.");
                     ctx.fillStyle = "rgb(" + being.genome.size * 32 + ", " + (being.genome.type  * 32) + " , " + (being.genome.shape * 32) + ")";
                     break;
             }
@@ -188,6 +206,8 @@ function renderWorld(world) {
     document.getElementById("animalsAlive").innerHTML = stats.animalsAlive;
     document.getElementById("plantsCreated").innerHTML = stats.plantsCreated;
     document.getElementById("plantsAlive").innerHTML = stats.plantsAlive;
+    document.getElementById("longestLineage").innerHTML = stats.longestLineage;
+    
 
     document.getElementById("averageAnimalAge").innerHTML = Math.floor(stats.averageAnimalAge / stats.animalsProcessed);
     document.getElementById("averageDeadAnimalAge").innerHTML = Math.floor(stats.averageDeadAnimalAge / stats.animalsDeadThisTick);
@@ -218,6 +238,7 @@ function renderWorld(world) {
     document.getElementById("animalMonitoredLocation").innerHTML = stats.animalMonitored.location;
     document.getElementById("animalMonitoredEnergy").innerHTML = stats.animalMonitored.energy;
     document.getElementById("animalMonitoredKidsSpawned").innerHTML = stats.animalMonitored.numberOfKids;
+    document.getElementById("animalMonitoredLineage").innerHTML = stats.animalMonitored.lineage;
     document.getElementById("animalMonitoredConsecutiveEnergyIncreases").innerHTML = stats.animalMonitored.consecutiveEnergyIncreases;
     document.getElementById("animalMonitoredSize").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.size : "";
     document.getElementById("animalMonitoredType").innerHTML = stats.animalMonitored.genome !== undefined ? stats.animalMonitored.genome.type : "";
@@ -231,6 +252,7 @@ function renderWorld(world) {
     document.getElementById("animalActedUponAge").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.age : "";
     document.getElementById("animalActedUponLocation").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.location : "";
     document.getElementById("animalActedUponEnergy").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.energy : "";
+    document.getElementById("animalActedUponBodyEnergy").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.bodyEnergy : "";
     document.getElementById("animalActedUponKidsSpawned").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.numberOfKids : "";
     document.getElementById("animalActedUponConsecutiveEnergyIncreases").innerHTML = stats.animalActedUpon !== {} ? stats.animalActedUpon.consecutiveEnergyIncreases : "";
     document.getElementById("animalActedUponSize").innerHTML = stats.animalActedUpon.genome !== undefined ? stats.animalActedUpon.genome.size : "";

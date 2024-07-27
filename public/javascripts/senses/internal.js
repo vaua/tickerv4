@@ -58,6 +58,7 @@
                 mutated.affinity = (mutated.affinity + getRandomInt(12) - 6) % internalAffinitySpace;
             }
 
+
             return mutated;
         }
 
@@ -84,12 +85,14 @@
                 energyStatus = 3;
             } else if (being.energy > being.initialMaxEnergy / 2) {
                 energyStatus = 2;
-            } else if (being.energy > being.initialMaxEnergy) {
+            } else if (being.energy > fifteenPercent) {
                 energyStatus = 1;
             } else {
                 energyStatus = 0;
             }
 
+            // What the hell are we figuring out here? Shouldn't this be about change? Where is being.energyDelta being set?
+            // If energy loss is more than 5% of max energy: 0. Loss of -5 to 0: 1. Gain up to 5: 2. Gain more than 5: 3.
             if (being.energyDelta < being.initialMaxEnergy * -0.05) {
                 energyDelta = 0;
             } else if (being.energyDelta < 0) {
@@ -144,6 +147,7 @@
 
                 var numberOfKids = Math.ceil(action / 32);
                 var energyAmount = (action % 4) + 1;
+                //var energyAmount = ((action % 4) * 25) + 5;
                 return [3, [being, numberOfKids, energyAmount]];
             }
         }

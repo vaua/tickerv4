@@ -20,15 +20,18 @@
         this.stats.plantsCreated = 0;
         this.stats.animalsAlive = 0;
         this.stats.plantsAlive = 0;
+        this.stats.longestLineage = 0;
         this.stats.worldSize = world_size;
         this.stats.animalTypeMonitored = "age";
         this.stats.animalColorScheme = "sitysha";
         this.running = false;
+        this.do_reboots = do_reboots;
+        this.reboot_limit = reboot_limit;
         this.stats.reboots = 0;
 
         this.target_beings = target_beings;
 
-        console.log("Starting world.");
+        console.log("Starting world with ", this.target_beings, " beings.");
 
         // Plot or replot the world
         this.canvas = document.getElementById("surface");
@@ -46,7 +49,7 @@
         //console.log("New random animal.");
         var genome = new Genome();
         var init_energy = getRandomInt(energy_norm) * (genome.size + 1);
-        var being = new Being(this.stats.beingsCreated++, init_energy, genome, this.stats.beingsCreated % 2);
+        var being = new Being(this.stats.beingsCreated++, init_energy, genome, this.stats.beingsCreated % 2, 0);
         
         updateStatsBeingCreated(this, being);
         this.addToLocation(getRandomLocation(), being);
@@ -58,12 +61,12 @@
     }
 
     function updateStatsBeingCreated(world, being) {
-        if (being.genome.type > 1) {
-            world.stats.beingsAlive++;
+        world.stats.beingsAlive++;
+       
+        if (being.isAnimal()) {
             world.stats.animalsCreated++;
             world.stats.animalsAlive++;
         } else {
-            world.stats.beingsAlive++;
             world.stats.plantsCreated++;
             world.stats.plantsAlive++;
         }
@@ -149,6 +152,10 @@
                             // get Impression from the sense, second method of the three.
                             // returns the impression number as well as id of the "object" that caused the impression.
                             var impressions = window.Sense.getImpressionsForSense(sense)([locations, being]);
+                            being.impressions[sense] = impressions;
+
+                            // Reset the previously recorded tracts
+                            being.triggeredTracts[sense] = 0;
 
                             // Check, for each impression, it any of the tracts is triggered.
                             for (var i = 0; i < impressions.length; i++) {
@@ -159,6 +166,7 @@
                                     var tract = tractsOfThisSense[t];
                                     var trigger = tract.trigger;
                                     //console.log("Checking " + impressions[i][0] + " against tract " + trigger);
+
 
                                     // Check if impression triggers the specific trigger
                                     if (checkIfImpressionTriggersTrigger(impressions[i][0], trigger, sense)) {
@@ -171,6 +179,8 @@
                                             affectedObjectId = impressions[i][1].id;
                                             affectedObjectLocation = impressions[i][1].location;
                                             
+                                            // Document what trigger triggered the action
+                                            being.triggeredTracts[sense] = tract;
                                             // No need to continue checking
                                             if (sense == 0) {
                                                 stats.visionTriggersGenerated++;
@@ -182,7 +192,7 @@
                                                     }
                                                 }
                                             }
-                                            break;
+                                            //break;
                                         }
                                     }
                                 }
@@ -201,6 +211,8 @@
                                 beingActions.push([]);
                             }
                         });
+                    } else {
+                        // No senses!
                     }
 
 
@@ -255,6 +267,10 @@
         this.stats.highestEnergyAnimal.energy = 0;
         this.stats.mostConsecutiveEnergyIncreases = {};
         this.stats.mostConsecutiveEnergyIncreases.consecutiveEnergyIncreases = 0;
+        this.stats.longestLineageAnimal = {};
+        this.stats.longestLineageAnimal.lineage = 0;
+        this.stats.specificAnimal = {};
+
         
 
         this.locations.filter(location => {return location != null;}).forEach(location => {
@@ -278,6 +294,74 @@
                     }
                 }
 
+                if (being === this.stats.animalMonitored) {
+                    // Assign this being to special animal in statistics
+                    this.stats.specificAnimal = being;
+                    //console.log("Spec, last impressions ", being.impressions);
+                    //console.log("Spec, last tracts ", being.triggeredTracts)
+                    console.log("Spec, last actions ", being.lastActions)
+
+                    var specificAanimalsStory = "";
+                    specificAanimalsStory += "I'm in " + being.location + " looking " + (being.orientation ? "right. ": "left. ")
+
+                    // Calculate how far I can see given my orientation
+                    var otherSide = being.location + (visibility * (being.orientation ? 1 : -1))
+                    //otherSide = otherSide > 0 ? otherSide : (this.stats.worldSize - otherSide)
+
+                    var visibleCreatures = []
+                    var start = being.orientation ? being.location : otherSide + 1 
+                    var end = being.orientation ? otherSide : being.location + 1 
+                    specificAanimalsStory += "Visibility is " + visibility + ". I see places " + being.location + " to " + otherSide + "(" + start + "/" + end + ")."
+
+                    //console.log("Start: ", start, "End: ", end)
+                    for (var i = start; i < end; i++) {
+                        i = (i >= 0) ? i : (this.stats.worldSize + i)
+                        //console.log("Looking into location ", (i), " seing ", this.locations[i])
+                        if (this.locations[i] !== undefined) {
+                            this.locations[i].forEach(function(cre) {
+                                visibleCreatures.push(cre)
+                            })
+                        }
+                    }
+                    var plants = visibleCreatures.filter(function(c) {return c.isAnimal() == false})
+                    var dead = visibleCreatures.filter(function(c) {return c.isDead() == true})
+                   
+                    specificAanimalsStory += "This means I see " + visibleCreatures.length + " creatures, " + plants.length + " plants and " + dead.length + "dead. "
+                    
+                    //console.log("Start: ", start, "End: ", end, " visible creatures: ", visibleCreatures.length)
+
+                    specificAanimalsStory += "My vision says I've seen " + being.impressions[0].length + " creatures."
+
+                    if (being.triggeredTracts[0] != 0) {
+                        specificAanimalsStory += "A trigger " + being.triggeredTracts[0].trigger + " with affinity " + being.triggeredTracts[0].affinity + " caused an action: " + being.triggeredTracts[0].action + ".<br>"
+                        if (being.triggeredTracts[0].action < 16) {
+                            var d = (being.triggeredTracts[0].action - 8) * Math.floor(being.genome.size / 2)
+                            specificAanimalsStory += "This means we are moving! Going " + Math.abs(d) + " steps " + ((d < 0) ? "left" : "right.<br>")
+                        } else {
+                            specificAanimalsStory += "We're attacking or eating! <br>"
+                        }
+                    } else {
+                        specificAanimalsStory += "<b>No action was triggered this time.</b><br>"
+                    }
+
+                    var iImp = being.impressions[1][0][0]
+                    var eSt = Math.floor( iImp / 4)
+                    var eDel = iImp % 4
+                    specificAanimalsStory += "My internal sense says " + iImp + ". This means energy status is " + eSt + "(quartal of " + being.initialMaxEnergy + ") and energy delta is " + eDel + " (" + being.energyDelta + ")."
+                    if (being.triggeredTracts[1] != 0) {
+                        specificAanimalsStory += "This has triggered " + being.triggeredTracts[1].trigger + " with affinity " + being.triggeredTracts[1].affinity + " caused an action: " + being.triggeredTracts[1].action + "."
+                        if (being.triggeredTracts[1].action < 128) {
+                            specificAanimalsStory += "W're adjusting tracts. Through some wierd method."
+                        } else {
+                            specificAanimalsStory += "<b>We're giving birth! To a baby!!</b>"
+                        }
+                    } else {
+                        specificAanimalsStory += "<b>No action was triggered this time.</b><br>"
+                    }
+
+                    document.getElementById("ast").innerHTML = specificAanimalsStory;
+                }
+
                 if (being.isAnimal() && !being.isDead()) {
                     this.stats.averageAnimalAge += being.age;
                     this.stats.animalsProcessed ++;
@@ -294,6 +378,12 @@
                     if (being.consecutiveEnergyIncreases > this.stats.mostConsecutiveEnergyIncreases.consecutiveEnergyIncreases) {
                         this.stats.mostConsecutiveEnergyIncreases = being;
                     }
+                    if (being.lineage > this.stats.longestLineageAnimal.lineage) {
+                        this.stats.longestLineageAnimal = being;
+                        if (being.lineage > this.stats.longestLineage) {
+                            this.stats.longestLineage = being.lineage;
+                        }
+                    }
                 }
 
                 if (being.isDecomposed()) {
@@ -305,10 +395,10 @@
 
 
                 // Replenish the world if necessary
-                if (do_reboots) {
-                    if (this.stats.animalsAlive < reboot_limit) {
+                if (this.do_reboots) {
+                    if (this.stats.animalsAlive < this.reboot_limit) {
                         // Create some more beings
-                        var new_limit = getRandomInt(target_beings * 2);
+                        var new_limit = getRandomInt(this.target_beings * 2);
                         for (var i = 0; i < new_limit; i++) {
                             this.createNewRandomAnimal();
                         }
@@ -331,9 +421,10 @@
         renderWorld(this);
 
         this.stats.animalActedUpon = {};
-        if (this.stats.animalsAlive && this.running > 0) 
+        if (this.stats.animalsAlive && this.running > 0) {
             var that = this;
             window.setTimeout(function() {that.tick(that.presentWorldAndGetActions());}, wait_between_ticks_to_avoid_overheating_ms);
+        }
     }
 
     function getRandomInt(max) {

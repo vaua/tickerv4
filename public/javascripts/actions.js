@@ -94,15 +94,22 @@
 
             if (world.locations[being.location].length > max_beings_per_location) return;
 
-            var energyGiven = Math.floor(being.energy * 0.15 * energyPercentage);
-
-            being.energy -= energyGiven;
+            var energyGiven = Math.floor(being.energy * 0.25 * energyPercentage);
             var energyPerKid = Math.floor(energyGiven / numberOfKids);
 
             
+            //var trueBeing = world.locations[being.location].filter(function(b) {return b.id === being.id})[0]
+            //console.log("Being energy before birth: ", being.energy, " true: ", trueBeing.energy)
+            //being.energy -= energyGiven;
+            being.adjustEnergy(-energyGiven);
+            if (energyPerKid < 5) {return}
+
+            //console.log("Being energy after birth: ", being.energy, " true: ", trueBeing.energy)
+            //console.log("Energy given to each (" + numberOfKids + ") kid: ", energyPerKid)
+
 
             for (var i = 0; i < numberOfKids; i++) {
-                var child = new Being(world.stats.beingsCreated++, energyPerKid, being.genome.mutate(general_mutation_severity), being.orientation);
+                var child = new Being(world.stats.beingsCreated++, energyPerKid, being.genome.mutate(general_mutation_severity), being.orientation, being.lineage);
                 being.numberOfKids++;
                 if (child.isAnimal()) {
                     world.stats.animalsCreated ++;

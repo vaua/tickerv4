@@ -125,8 +125,11 @@ describe("World", function() {
             });
 
             // There should be one actions, as we have designed the vision to react
+            console.log("Act", actions)
+
             chai.expect(flatActions.length).to.equal(1);
             w1.tick(actions);
+            console.log("Act", actions)
             chai.expect(w1.locations[world_size - 8].length).to.equal(1);
 
 
@@ -423,9 +426,87 @@ describe("World", function() {
             chai.expect(flatActions.length).to.equal(1);
             w1.tick(actions);
 
-            chai.expect(w1.locations[10][0].energy).equal(94);
+            chai.expect(w1.locations[10][0].energy).equal(124);
             chai.expect(w1.locations[9][0].energy).equal(103);
 
+        });
+
+        it("Creates one plant eating animal and one plane and run for some time", function() {
+            var w1 = new World();    
+            chai.expect(w1.stats.beingsAlive).to.equal(0);
+
+            // First create a plant
+            console.log("Creating plant.");
+
+            var p1g = new Genome(true);
+            p1g.size = 6;
+            p1g.shape = 5;
+            p1g.type = 0;
+            p1g.tracts = [];
+            p1g.tracts[0] = [];
+            p1g.tracts[1] = [];
+
+            var startEnergy = 100;
+            var p1 = new Being(0, startEnergy, p1g, 0);
+            p1.bodyEnergy = 15;
+            w1.createSpecificBeing(p1, 10);
+            
+            chai.expect(w1.stats.beingsAlive).to.equal(1);
+
+            //Now create a plant eating animal.
+            console.log("Creating animal.");
+
+            var a1g = new Genome(true);
+            a1g.size = 2;
+            a1g.shape = 7;
+            a1g.type = 2;
+            a1g.tracts = [];
+            a1g.tracts[0] = [];
+            a1g.tracts[1] = [];
+
+            //Create tracts for one sense - vision
+            var a1t1 =  {};
+          
+            // Level 1 triggers on 1. Will trigger action 1 with affinity 5.
+            a1t1.trigger = [11, 0, 0];
+            a1t1.action = 19;
+            a1t1.affinity = 5;
+            
+
+            a1g.tracts[0].push(a1t1);
+
+            var a1 = new Being(1, startEnergy, a1g, 1);
+            w1.createSpecificBeing(a1, 9);
+
+            // Now execute
+            console.log("Tick 1");
+            var actions = w1.presentWorldAndGetActions();
+
+            var flatActions = actions.flat().filter(function(el) {
+                return (el != null && el.length > 0);
+            });
+
+            chai.expect(flatActions.length).to.equal(1);
+            w1.tick(actions);
+
+            chai.expect(w1.locations[10][0].energy).equal(124);
+            chai.expect(w1.locations[9][0].energy).equal(103);
+
+            console.log("High growth: ", high_growth_areas)
+
+            for (var t = 0; t < 10; t ++) {
+                console.log("Tick ", t + 1);
+                var actions = w1.presentWorldAndGetActions();
+                console.log(actions)
+                w1.tick(actions)
+
+                console.log("Plant energy: ", w1.locations[10][0].energy, "/", w1.locations[10][0].bodyEnergy)
+                console.log("Animal energy: ", w1.locations[9][0].energy, "/", w1.locations[9][0].bodyEnergy)
+               
+    
+            }
+
+           
         });
         
     });

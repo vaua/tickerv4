@@ -20,6 +20,10 @@
     <button type="button" onclick="executeOneTick();">Step</button>
     <button type="button" onclick="startWorld();">Reset</button>
     <div class="status"><h3 id="status">Status: </h3></div>
+    <div style="border:solid; vertical-align: bottom; height: 400; width: 400;">
+        <p id="ast"></p>
+    </div>
+
     <div>
         <h2>
             <h3>Color coding scheme:</h3>
@@ -83,6 +87,10 @@
                 <tr>
                     <td>Plants Alive</td>
                     <td id="plantsAlive"></td>
+                </tr>
+                <tr>
+                    <td>Longest Lineage</td>
+                    <td id="longestLineage"></td>
                 </tr>
                 <tr style="border-bottom: 1px solid black;">
                     <td colspan="100%">________________________________________</td>
@@ -216,7 +224,15 @@
             <label for="increasedEnergy">Consecutive Energy Increase</label><br>
             <input type="radio" id="mostKids" name="animal" onclick="onRadioClick(this);" value="mostKids">
             <label for="mostKids">Most Kids Spawned</label><br>
+            <input type="radio" id="longestLineage" name="animal" onclick="onRadioClick(this);" value="longestLineage">
+            <label for="longestLineage">Longest Lineage</label><br>
+            <input type="radio" id="specific" name="animal" value="specific" disabled="true">
+            <label for="specific">Specific Queried</label><br>
             
+            <input type="text" id="qa_id" name="qa_id" value="">
+            <label for="qa_id">Animal queried</label><br>
+            <button type="button" onclick="setQueriedAnimal(document.getElementById('qa_id').value)">Query</button>
+
             <h3>Followed Animal Statistics</h3>
             <table id="animalTable">
                 <tr>
@@ -224,49 +240,53 @@
                     <th>Value</th>
                 </tr>
                 <tr>
-                    <td>Animal Id Of Animal With Age</td>
+                    <td>Id</td>
                     <td id="animalMonitoredId"></td>
                 </tr>
                 <tr>
-                    <td>Animal Age</td>
+                    <td>Age</td>
                     <td id="animalMonitoredAge"></td>
                 </tr>
                 <tr>
-                    <td>Animal Location</td>
+                    <td>Location</td>
                     <td id="animalMonitoredLocation"></td>
                 </tr>
                 <tr>
-                    <td>Animal Energy</td>
+                    <td>Energy</td>
                     <td id="animalMonitoredEnergy"></td>
                 </tr>
                 <tr>
-                    <td>Animal Kids Spawned</td>
+                    <td>Kids Spawned</td>
                     <td id="animalMonitoredKidsSpawned"></td>
                 </tr>
                 <tr>
-                    <td>Animal Consecutive Energy</td>
+                    <td>Lineage</td>
+                    <td id="animalMonitoredLineage"></td>
+                </tr>
+                <tr>
+                    <td>Consecutive Energy</td>
                     <td id="animalMonitoredConsecutiveEnergyIncreases"></td>
                 </tr>
                 <tr>
-                    <td>Animal Size</td>
+                    <td>Size</td>
                     <td id="animalMonitoredSize"></td>
                 </tr>
                 <tr>
-                    <td>Animal Type</td>
+                    <td>Type</td>
                     <td id="animalMonitoredType"></td>
                 </tr>
                 <tr>
-                    <td>Animal Shape</td>
+                    <td>Shape</td>
                     <td id="animalMonitoredShape"></td>
                 </tr>
 
                 <tr>
-                    <td>Last Active Visual Impression</td>
+                    <td>Last Visual Impression</td>
                     <td id="animalMonitoredLastImpressions"></td>
                 </tr>
 
                 <tr>
-                    <td>Last Active Visual Trigger</td>
+                    <td>Last Visual Trigger</td>
                     <td id="animalMonitoredLastTrigger"></td>
                 </tr>
 
@@ -303,6 +323,10 @@
                 <tr>
                     <td>Animal Energy</td>
                     <td id="animalActedUponEnergy"></td>
+                </tr>
+                <tr>
+                    <td>Animal Body Energy</td>
+                    <td id="animalActedUponBodyEnergy"></td>
                 </tr>
                 <tr>
                     <td>Animal Kids Spawned</td>
@@ -356,5 +380,7 @@
 
 
         </div>
+        
     </div>
+
 </body>

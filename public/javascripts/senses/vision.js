@@ -91,20 +91,29 @@
             // Figure out what animal can see
             //console.log("Creating impressions from the world.");
             var visible_objects = [];
-            if (animal.orientation == 0) {  // animal is facing "left"
-                visible_objects = locations.slice(animal.location - visibility, animal.location);
-                visible_objects = visible_objects.flat();
-                visible_objects = visible_objects.filter(function (el) {
-                        return el != null;
-                });
-            } else {
-                visible_objects = locations.slice(animal.location,
-                    animal.location + visibility).flat().filter(function (el) {
-                        return el != null;
-                    });
-            }
-            //console.log("Currently seing: " + visible_objects);
 
+            // orientation: 0: left, 1: right
+            // farEnd: stop point for visibility, going either left or right from the intividual
+            // start / end: start and stop locations calculated
+            var farEnd =  animal.location + (visibility * (animal.orientation ? 1 : -1))
+            var start = animal.orientation ? animal.location : farEnd + 1
+            var end   = animal.orientation ? farEnd : animal.location + 1
+
+            //console.log("Vision start/end: ", start, "/", end)
+
+            for (var i = start; i < end; i++) {
+                i = (i >= 0) ? i : (world_size + i)
+                if (locations[i] !== undefined) {
+                    locations[i].forEach(function(creature) {
+                        visible_objects.push(creature)
+                    })
+                }
+            }
+            
+            //if (animal === window.world.stats.animalMonitored) {
+            //    console.log("Currently seing: " + visible_objects.length);
+            //}
+            
             visible_objects.forEach(obj => {
 
                 if (obj.genome !== undefined) {
@@ -232,6 +241,7 @@
                 if (!presumptiveFood.isAnimal() || presumptiveFood.genome.shape < Math.pow(2, animalShapeBits - 1)) {
                     // Dead animal or food, to be consumed
                     // This is amount of energy we can gobble
+                    //console.log("Eating " + presumptiveFood.isAnimal() ? "dead animal" : "plant.")
                     var energyUtilised = (animal.genome.size * 4) - Math.abs(animal.genome.type - presumptiveFood.genome.type - Math.pow(2, animalTypeBits-1));
 
                     if (energyUtilised > presumptiveFood.energyLeftToBeClaimed()) {
@@ -241,6 +251,7 @@
                             energyUtilised = presumptiveFood.energyLeftToBeClaimed();
                         } else {
                             // Nothing left. No actions.
+                            //console.log("Noop... nothing left to eat.")
                             return [];
                         }
                     }
@@ -257,7 +268,7 @@
                     // Small animal with low energy will make least impact. Big animal with
                     // lots of energy will make the most impact.
 
-                    console.log("There was an attack!");
+                    //console.log("There was an attack!");
 
                     // This is ok for now, will add energy impact later.
                     var damage = Math.pow(2, animalSizeBits) + animal.genome.size - presumptiveFood.genome.size;

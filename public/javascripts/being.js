@@ -6,18 +6,28 @@
     var energyContent = 5;
     var plantEnergyGain = 1;
 
-    function Being(id, initialEnergy, genome, orientation) {
+    function Being(id, initialEnergy, genome, orientation, lineage) {
         this.id = id;
         this.initialEnergy = initialEnergy;
         this.energy = initialEnergy;
+        this.energyDelta = 0;
         this.genome = genome;
         this.orientation = orientation;
         this.affinities = [];
         this.dead = false;
         this.age = 0;
+
+        // Stuff decided in the last round
+        // Array of senses, each sense has an object of impressions returned.
+        this.impressions = {};
+        // Array of senses, the tract that was triggered.
+        this.triggeredTracts = {};
+        // The action triggered last time.
+        this.lastActions = [];
+
         this.lastImpressions = [];
         this.lastTrigger = [];
-        this.lastActions = [];
+
         this.numberOfKids = 0;
         this.consecutiveEnergyIncreases = 0;
         this.energyLastTick = 0;
@@ -29,6 +39,7 @@
         this.bodyEnergyClaimed = 0;
         this.bodyEnergy = 0;
         this.maxBodyEnergy = this.genome.size * energyContent;
+        this.lineage = lineage + 1;
 
 
         // Set up afinities for all tracts
@@ -47,8 +58,8 @@
             if (this.isAnimal()) {
                 var energyChange = energyLoss * (this.genome.size + 1);
                 this.energy -= energyChange;
-                if (this.bodyEnergy < this.maxBodyEnergy) this.bodyEnergy += energyChange;
-                if (this.bodyEnergy > this.maxBodyEnergy) this.bodyEnergy = this.maxBodyEnergy;
+                this.bodyEnergy += energyChange;
+                
 
                  // Diminish max energy due to old age
                 if (this.age > this.old_energy_dropoff_threshold) {
@@ -57,11 +68,16 @@
 
             } else {
                 if (this.inHighGrowthArea()) {
-                    this.bodyEnergy += 30;
+                    // Changed this on 25/7 to see if there is a difference
+                    this.bodyEnergy += 1;
+                    this.energy += 2;
+
                 } else {
-                    this.bodyEnergy += 9;
+                    this.bodyEnergy += 1;
+                    this.energy += 0
                 }
             }
+            if (this.bodyEnergy > this.maxBodyEnergy) this.bodyEnergy = this.maxBodyEnergy;
             this.age++;
         } else {
             // for dead beings, just ordinary decay...
@@ -82,6 +98,7 @@
             this.energy = this.maxEnergy;
         }
 
+        this.energyDelta = this.energy - this.energyLastTick;
         this.energyLastTick = this.energy;
     }
 

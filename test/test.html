@@ -2,7 +2,8 @@
 <html>
   <head>
     <title>Mocha Tests</title>
-    <link rel="stylesheet" href="../node_modules/mocha/mocha.css">
+    <link rel = "stylesheet" href="../node_modules/mocha/mocha.css">
+    <link rel = "stylesheet" href="../public/stylesheets/style.css">
   </head>
   <body>
 
@@ -54,6 +55,9 @@
     <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
 
 
+    <div style="border:solid; vertical-align: bottom; height: 400; width: 400;">
+        <p id="ast"></p>
+    </div>
 
     <div class="stats">
         <h3>World Statistics</h3>
@@ -80,6 +84,10 @@
             <tr>
                 <td>Plants Alive</td>
                 <td id="plantsAlive"></td>
+            </tr>
+            <tr>
+                <td>Longest Lineage</td>
+                <td id="longestLineage"></td>
             </tr>
             <tr style="border-bottom: 1px solid black;">
                 <td colspan="100%">________________________________________</td>
@@ -241,6 +249,10 @@
                 <td id="animalMonitoredKidsSpawned"></td>
             </tr>
             <tr>
+                <td>Lineage</td>
+                <td id="animalMonitoredLineage"></td>
+            </tr>
+            <tr>
                 <td>Animal Consecutive Energy</td>
                 <td id="animalMonitoredConsecutiveEnergyIncreases"></td>
             </tr>
@@ -300,6 +312,10 @@
             <tr>
                 <td>Animal Energy</td>
                 <td id="animalActedUponEnergy"></td>
+            </tr>
+            <tr>
+                <td>Animal Body Energy</td>
+                <td id="animalActedUponBodyEnergy"></td>
             </tr>
             <tr>
                 <td>Animal Kids Spawned</td>
