@@ -347,7 +347,7 @@
                     var iImp = being.impressions[1][0][0]
                     var eSt = Math.floor( iImp / 4)
                     var eDel = iImp % 4
-                    specificAanimalsStory += "My internal sense says " + iImp + ". This means energy status is " + eSt + "(quartal of " + being.initialMaxEnergy + ") and energy delta is " + eDel + " (" + being.energyDelta + ")."
+                    specificAanimalsStory += "My internal sense says " + iImp + ". This means energy status is " + eSt + "(quartal of " + being.maxEnergy + ") and energy delta is " + eDel + " (" + being.energyDelta + ")."
                     if (being.triggeredTracts[1] != 0) {
                         specificAanimalsStory += "This has triggered " + being.triggeredTracts[1].trigger + " with affinity " + being.triggeredTracts[1].affinity + " caused an action: " + being.triggeredTracts[1].action + "."
                         if (being.triggeredTracts[1].action < 128) {

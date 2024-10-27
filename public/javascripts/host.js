@@ -6,19 +6,52 @@
 
 
 function startWorld() {
-    document.getElementById("status").innerHTML = "Status: Creating world."
-    window.world = new World();
+    setStats();
+}
 
-    // Populate world
-    for (var i = 0; i < window.world.target_beings; i++) {
-        window.world.createNewRandomAnimal();
-    }
-    console.log("World created.");
-    
-    document.getElementById("status").innerHTML = "Status: World created."
+function restartWorld() {
+    window.world = undefined;
+}
+
+function setStats() {
+    document.getElementById("worldSizeConst").value = world_size
+    document.getElementById("targetBeingsConst").value = target_beings
+    document.getElementById("maxBeingsLocationConst").value = max_beings_per_location
+    document.getElementById("mutSevConst").value = general_mutation_severity
+
+
+}
+
+function updateStats() {
+    var worldSizeInput = parseInt(document.getElementById("worldSizeConst").value, 10);
+    if (10 < worldSizeInput < 1000000) world_size = worldSizeInput;
+
+    var targetBeingsInput = parseInt(document.getElementById("targetBeingsConst").value, 10);
+    if (1 < targetBeingsInput < 10000000) target_beings = targetBeingsInput;
+
+    var maxBeingsInput = parseInt(document.getElementById("maxBeingsLocationConst").value, 10);
+    if (1 < maxBeingsInput < 10000) max_beings_per_location = maxBeingsInput;
+
+    var mutSevInput = parseInt(document.getElementById("mutSevConst").value, 10);
+    if (0 < mutSevInput < 101) general_mutation_severity = mutSevInput;
+
+    setStats();
 }
 
 function togglePauseWorld() {
+    if (window.world === undefined) {
+        document.getElementById("status").innerHTML = "Status: Creating world.";
+        window.world = new World();
+
+        // Populate world
+        for (var i = 0; i < window.world.target_beings; i++) {
+            window.world.createNewRandomAnimal();
+        }
+        console.log("World created.");
+    
+        document.getElementById("status").innerHTML = "Status: World created."
+    }
+
     document.getElementById("status").innerHTML = window.world.running ? "Status: World paused." : "Status: World running.";
     window.world.running = !window.world.running;
 
@@ -26,6 +59,32 @@ function togglePauseWorld() {
         window.world.tick(window.world.presentWorldAndGetActions());
     }
 }
+
+function toggleWorldStats() {
+
+    if (document.getElementById("worldStats").style.display != "none") {
+        document.getElementById("worldStats").style.display = "none";
+    } else {
+        document.getElementById("worldStats").style.display = "block";
+    }
+}
+
+function toggleAnimalStats() {
+
+    console.log("V", document.getElementById("animalStats").style.display)
+    if (document.getElementById("animalStats").style.display != "none") {
+        console.log("It is not none, will set to hidden.");
+        document.getElementById("animalStats").style.display = "none";
+        document.getElementById("animalActedUpon").style.display = "none";
+
+    } else {
+        console.log("It is none, will set to block.");
+        document.getElementById("animalStats").style.display = "block";
+        document.getElementById("animalActedUpon").style.display = "block";
+
+    }
+}
+
 
 function executeOneTick() {
     if (!window.world.running) {

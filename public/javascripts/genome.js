@@ -25,7 +25,7 @@
         this.tracts = [];
 
         this.size = getRandomInt(animalSizeSpace);
-        this.shape = getRandomInt(animalShapeSpace / 2) + (animalShapeSpace / 2);
+        this.shape = getRandomInt(animalShapeSpace / 2) + (animalShapeSpace / 2);  // upper half are live beings, lower half dead
         this.type = getRandomInt(animalTypeSpace);
 
         // For each sense that this type of animal has

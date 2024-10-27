@@ -18,7 +18,12 @@
 
     <button type="button" onclick="togglePauseWorld();">Start / Pause</button>
     <button type="button" onclick="executeOneTick();">Step</button>
-    <button type="button" onclick="startWorld();">Reset</button>
+    <button type="button" onclick="restartWorld();">Reset</button>
+    
+    <button type="button" onclick="toggleWorldStats();">Toggle World Stats</button>
+    <button type="button" onclick="toggleAnimalStats();">Toggle Animal Stats</button>
+
+
     <div class="status"><h3 id="status">Status: </h3></div>
     <div style="border:solid; vertical-align: bottom; height: 400; width: 400;">
         <p id="ast"></p>
@@ -60,9 +65,38 @@
         
         <canvas class="canv" width="700" height="700" id="surface">Canvas not Supported</canvas>
 
+        <div class="stats" id="const">
+            <h3>Constants setup</h3>
+            <table id="constTable">
+                <tr>
+                    <th>Const</th>
+                    <th>Value</th>
+                </tr>
+                <tr>
+                    <td><label for="worldSizeConst">World Size</label></td>
+                    <td><input type="number" id="worldSizeConst" name="worldSizeConst"></td>
+                </tr>
+                <tr>
+                    <td><label for="targetBeingsConst">Target Beings</label></td>
+                    <td><input type="number" id="targetBeingsConst" name="targetBeingsConst"></td>
+                </tr>
+                <tr>
+                    <td><label for="maxBeingsLocationConst">Max per location</label></td>
+                    <td><input type="number" id="maxBeingsLocationConst" name="maxBeingsLocationConst"></td>
+                </tr>
+                <tr>
+                    <td><label for="mutSevConst">Mutation Severity</label></td>
+                    <td><input type="number" id="mutSevConst" name="mutSevConst"></td>
+                </tr>
+
+            </table>
+
+            <button type="button" onclick="updateStats();">Update stats</button>
+
+        </div>
 
 
-        <div class="stats">
+        <div class="stats" id="worldStats">
             <h3>World Statistics</h3>
             <table id="worldTable">
                 <tr>
@@ -214,7 +248,7 @@
             </table>
         </div>
 
-        <div class="stats">
+        <div class="stats" id="animalStats">
             <h3>Animal to follow:</h3>
             <input type="radio" id="age" name="animal" value="age" onclick="onRadioClick(this);" checked="checked">
             <label for="age">Highest age</label><br>
@@ -301,7 +335,7 @@
             </table>
         </div>
 
-        <div class="stats">
+        <div class="stats" id="animalActedUpon">
             <h3>Animal acted upon:</h3>
             <table id="animalTable">
                 <tr>

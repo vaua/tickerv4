@@ -92,7 +92,10 @@
             var numberOfKids = params[1];
             var energyPercentage = params[2];
 
-            if (world.locations[being.location].length > max_beings_per_location) return;
+            if (world.locations[being.location].length > max_beings_per_location) {
+                console.log("The maximum amount of ocupants in one position reached. Birth ignored.")
+                return;
+            }
 
             var energyGiven = Math.floor(being.energy * 0.25 * energyPercentage);
             var energyPerKid = Math.floor(energyGiven / numberOfKids);

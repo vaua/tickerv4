@@ -51,6 +51,10 @@
             mutated.affinity = tract.affinity;
 
             if (getRandomInt(100) < severity) {
+                mutated.trigger = (mutated.trigger + getRandomInt(12) - 6) % internalTriggerSpace;
+            }
+
+            if (getRandomInt(100) < severity) {
                 mutated.action = (mutated.action + getRandomInt(12) - 6) % internalActionSpace;
             }
 
@@ -80,10 +84,10 @@
 
             // What is max energy for being type?
             // Under 15% => 0, 15-50% =>1, 50-85% = 2, 85-100% = 3;
-            var fifteenPercent = Math.floor(being.initialMaxEnergy  * 0.15);
-            if (being.energy > being.initialMaxEnergy - fifteenPercent) {
+            var fifteenPercent = Math.floor(being.maxEnergy  * 0.15);
+            if (being.energy > being.maxEnergy - fifteenPercent) {
                 energyStatus = 3;
-            } else if (being.energy > being.initialMaxEnergy / 2) {
+            } else if (being.energy > being.maxEnergy / 2) {
                 energyStatus = 2;
             } else if (being.energy > fifteenPercent) {
                 energyStatus = 1;
@@ -93,11 +97,11 @@
 
             // What the hell are we figuring out here? Shouldn't this be about change? Where is being.energyDelta being set?
             // If energy loss is more than 5% of max energy: 0. Loss of -5 to 0: 1. Gain up to 5: 2. Gain more than 5: 3.
-            if (being.energyDelta < being.initialMaxEnergy * -0.05) {
+            if (being.energyDelta < being.maxEnergy * -0.05) {
                 energyDelta = 0;
             } else if (being.energyDelta < 0) {
                 energyDelta = 1;
-            } else if (being.energyDelta < being.initialMaxEnergy * 0.05) {
+            } else if (being.energyDelta < being.maxEnergy * 0.05) {
                 energyDelta = 2;
             } else {
                 energyDelta = 3;

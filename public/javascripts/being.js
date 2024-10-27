@@ -2,47 +2,46 @@
 
 (function() {
 
-    var energyLoss = 1;
-    var energyContent = 5;
-    var plantEnergyGain = 1;
-
+    /* Being is borh with following parameters:
+        - id: The id of the being in the world. Unique.
+        - Initial Energy: If child, depends on how much energy parent gives. If random... then random up to limit.
+        - Genome: Structure deciding on size, type, shape and trigger/action pairs. Defines the being.
+        - Orientation: Hum - funny one, given we are not sending in location... but basically, is being looking left or right.
+        - Lineage: Generational number of the being. Randomly created beings have lineage 1. Their offspring 2. Theirs 3... and so on. 
+    */
     function Being(id, initialEnergy, genome, orientation, lineage) {
         this.id = id;
-        this.initialEnergy = initialEnergy;
         this.energy = initialEnergy;
-        this.energyDelta = 0;
         this.genome = genome;
         this.orientation = orientation;
-        this.affinities = [];
+        this.lineage = lineage + 1;
+
+        this.maxEnergy = max_energy_coefficient * this.genome.size;  // Maximum energy that this being can have.
+        this.old_energy_dropoff_threshold = old_energy_coefficient * this.genome.size; // Age limit after which max energy is dimished
+        this.maxBodyEnergy = this.genome.size * bodyEnergyContent;   // Maxixum energy stored in beings body, that can be consumed after death
+
+        // Zero out all counters.
         this.dead = false;
+        this.energyDelta = 0;
         this.age = 0;
-
-        // Stuff decided in the last round
-        // Array of senses, each sense has an object of impressions returned.
-        this.impressions = {};
-        // Array of senses, the tract that was triggered.
-        this.triggeredTracts = {};
-        // The action triggered last time.
-        this.lastActions = [];
-
-        this.lastImpressions = [];
-        this.lastTrigger = [];
-
         this.numberOfKids = 0;
         this.consecutiveEnergyIncreases = 0;
         this.energyLastTick = 0;
-        this.maxEnergy = max_energy_coefficient * this.genome.size;
-        this.initialMaxEnergy = this.maxEnergy;
-        this.old_energy_dropoff_threshold = old_energy_coefficient * this.genome.size;
         this.timesAttacked = 0;
         this.timesEaten = 0;
         this.bodyEnergyClaimed = 0;
         this.bodyEnergy = 0;
-        this.maxBodyEnergy = this.genome.size * energyContent;
-        this.lineage = lineage + 1;
 
+        // Stuff decided in the last round
+        this.impressions = {};        // For each sense, all impressions from the last tick.
+        this.triggeredTracts = {};    // For each senses, the tract that was triggered during last tick.
+        this.lastActions = [];        // The action triggered last time.
+
+        this.lastImpressions = []; // The impression that triggered being in the last tick
+        this.lastTrigger = [];     // The trigger triggered in the last tick
 
         // Set up afinities for all tracts
+        this.affinities = [];
         this.getSensesArray().forEach(sense => {
             this.affinities[sense] = [];
             for (var i = 0; i < this.genome.tracts[sense].length; i++) {
@@ -69,12 +68,11 @@
             } else {
                 if (this.inHighGrowthArea()) {
                     // Changed this on 25/7 to see if there is a difference
-                    this.bodyEnergy += 1;
-                    this.energy += 2;
+                    this.bodyEnergy += energyHighGain;
+                    this.energy += energyHighGain;
 
                 } else {
-                    this.bodyEnergy += 1;
-                    this.energy += 0
+                    this.bodyEnergy += energyGain;
                 }
             }
             if (this.bodyEnergy > this.maxBodyEnergy) this.bodyEnergy = this.maxBodyEnergy;
@@ -147,6 +145,7 @@
 
     Being.prototype.checkForDeath = function() {
         if (this.energy <= 0 && !this.isDead()) {
+            // Being is dead, remove all the senses, and set shape to under 128.
             this.genome.tracts = [];
             this.genome.shape -= animalShapeSpace / 2;
             this.dead = true;
